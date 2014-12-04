@@ -37,7 +37,7 @@ namespace OtterTutorial.Entities
         {
             Random r = new Random();
 
-            fireRate = r.Next(5, 50);
+            fireRate = 5;//r.Next(5, 50);
             baseDamage = r.Next(5, 50);
             bulletRange = r.Next(100, 500);//
             bulletSpeed = 2;// r.Next(5, 8);
