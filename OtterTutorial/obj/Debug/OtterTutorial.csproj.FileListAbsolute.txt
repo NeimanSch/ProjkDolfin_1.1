@@ -1,0 +1,16 @@
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\OtterTutorial.exe.config
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\libsndfile-1.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\openal32.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\csfml-audio-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\csfml-graphics-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\csfml-window-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\OtterTutorial.exe
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\OtterTutorial.pdb
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\Otter.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\sfmlnet-graphics-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\sfmlnet-window-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\sfmlnet-audio-2.dll
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\bin\Debug\Otter.pdb
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\obj\Debug\OtterTutorial.csprojResolveAssemblyReference.cache
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\obj\Debug\OtterTutorial.exe
+C:\Users\neiman\Documents\GitHub\ProjkDolfin_1.0\OtterTutorial\obj\Debug\OtterTutorial.pdb
