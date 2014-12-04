@@ -22,6 +22,9 @@ namespace OtterTutorial.Entities
 
         public bool dead = false;
 
+        //Weapon for testing
+        public Weapon equippedWeapon;
+
         public Player(float x = 0, float y = 0)
         {
             // When creating a new player, the desired X,Y coordinates are passed in. If excluded, we start at 0,0
@@ -44,6 +47,8 @@ namespace OtterTutorial.Entities
 
             // Lastly, we must set our Entity's graphic, otherwise it will not display
             Graphic = sprite;
+
+            equippedWeapon = new Weapon();
 
             sprite.Play("standDown");
 
@@ -146,26 +151,8 @@ namespace OtterTutorial.Entities
                 }
             }
 
-            if (Global.PlayerSession.Controller.R1.Pressed)
-            {
-                Global.TUTORIAL.Scene.Add(new Bullet(X, Y, direction, "player"));
-            }
-            else if (Global.PlayerSession.Controller.B.Pressed)
-            {
-                Global.TUTORIAL.Scene.Add(new Bullet(X, Y, Global.DIR_RIGHT, "player"));
-            }
-            else if (Global.PlayerSession.Controller.X.Pressed)
-            {
-                Global.TUTORIAL.Scene.Add(new Bullet(X, Y, Global.DIR_LEFT, "player"));
-            }
-            else if (Global.PlayerSession.Controller.Y.Pressed)
-            {
-                Global.TUTORIAL.Scene.Add(new Bullet(X, Y, Global.DIR_UP, "player"));
-            }
-            else if (Global.PlayerSession.Controller.A.Pressed)
-            {
-                Global.TUTORIAL.Scene.Add(new Bullet(X, Y, Global.DIR_DOWN, "player"));
-            }
+            // CHECK FOR WEAPON SHOOTAN
+            equippedWeapon.fire();
 
             // Add particles if the player is moving in any direction
             if (verticalMovement || horizontalMovement)

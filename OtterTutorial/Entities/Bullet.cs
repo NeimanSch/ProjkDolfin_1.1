@@ -10,8 +10,11 @@ namespace OtterTutorial.Entities
 {
     public class Bullet : Entity
     {
+
+        private const int BULLET_PAT_CIRCLE = 0;
+
         // Default bullet speed
-        public float bulletSpeed = 5.0f;
+        public float bulletSpeed = 10.0f;
 
         // Direction the bullet is going to travel in
         public int direction = 0;
@@ -23,6 +26,20 @@ namespace OtterTutorial.Entities
         public float maxDistance = 350f;
         public int WIDTH = 16;
         public int HEIGHT = 14;
+
+        //This is how far apart bullets are if multiple ones shoot out at the same time
+        public float projectileSpread;
+
+        // This is how the bullet will travel once it leaves the gun - i.e. a circular pattern, straight, zig zag, etc
+        public int bulletPattern = 0;
+
+        //This is for circular bullet patterns
+        public double circRadius = 30;
+        public double circCenterX = 0.0;
+        public double circCenterY = 0.0;
+        public double circRotationSpeed = 0.2;
+        public double circAngle = 0.0;
+
         // The image object that is our bullet's graphic
         public virtual Image image { get; set; }
 
@@ -33,13 +50,15 @@ namespace OtterTutorial.Entities
         public double pDist = 0;
         public string shooter;
 
-        public Spritemap<string> sprite;
-
         public Bullet(float x, float y)
         {
             // Set the Bullet's X,Y coordinates, and its direction
             X = x;
             Y = y;
+
+            circCenterX = X;
+            circCenterY = Y;
+
             direction = Global.DIR_RIGHT;
             shooter = "";
 
@@ -78,6 +97,52 @@ namespace OtterTutorial.Entities
             shooter = s;
         }
 
+        public Bullet(float x, float y, int dir, string s, int bulletHeight, int bulletWidth, float range, float speed)
+            : this(x, y, dir, s)
+        {
+            HEIGHT = bulletHeight;
+            WIDTH = bulletWidth;
+            maxDistance = range;
+            bulletSpeed = speed;
+
+            if (bulletPattern == BULLET_PAT_CIRCLE)
+            {
+                InitCircPattern();
+            }
+        }
+
+
+        /**
+         * This method handles the offset of the bullet when shooting in a circular pattern.
+         * This prevents the bullet from spawning out from the side or behind the player since
+         * initially the player is the center point for the bullet.
+         * */
+        private void InitCircPattern()
+        {
+            circCenterX = X;
+            circCenterY = Y;
+            if (this.direction == Global.DIR_UP)
+            {
+                circCenterY = Y - circRadius;
+                circAngle = 270;
+            }
+            else if (this.direction == Global.DIR_DOWN)
+            {
+                circCenterY = Y + circRadius;
+                circAngle = 90;
+            }
+            else if (this.direction == Global.DIR_RIGHT)
+            {
+                circCenterX = X + circRadius;
+                circAngle = 180;
+            }
+            else if (this.direction == Global.DIR_LEFT)
+            {
+                circCenterX = X - circRadius;
+                circAngle = 0;
+            }
+        }
+
         public Boolean CheckGridCollisions(GameScene scene, float p, Boolean xAxis)
         {
             Boolean collision = false;
@@ -97,7 +162,8 @@ namespace OtterTutorial.Entities
             }
             return collision;
         }
-        public void EnemyBulletMovement(GameScene scene)
+
+        public void EnemyBulletMovement(ref GameScene scene)
         {
             xDiff = Global.player.X - X;
             yDiff = Global.player.Y - Y;
@@ -161,7 +227,8 @@ namespace OtterTutorial.Entities
                 RemoveSelf();
             }
         }
-        public void PlayerBulletMovement(GameScene scene)
+
+        public void PlayerBulletMovement(ref GameScene scene)
         {
             float newX;
             float newY;
@@ -220,6 +287,96 @@ namespace OtterTutorial.Entities
             }
         }
 
+        /**
+         * This function handles updating the bullet position for circular
+         * bullet patterns.
+         * x1 = x + radius * Math.Cos(angle * (Math.PI / 180));
+         * y1 = y + radius * Math.Sin(angle * (Math.PI / 180));
+         **/
+        private void CircularMovement(ref GameScene scene)
+        {
+            float newX;
+            float newY;
+
+            switch (direction)
+            {
+                case Global.DIR_UP:
+                    {
+                        circCenterY -= bulletSpeed;
+
+                        Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
+                        X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
+
+                        //jb - udpated to make the bullets collide with solid map objectss
+                        newY = Y + bulletSpeed;
+                        if (scene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
+                        {
+                            Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                            RemoveSelf();
+                        }
+                        break;
+                    }
+                case Global.DIR_DOWN:
+                    {
+                        circCenterY += bulletSpeed;
+                        
+                        Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
+                        X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
+
+                        //jb - udpated to make the bullets collide with solid map objectss
+                        newY = Y - bulletSpeed;
+                        if (scene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
+                        {
+                            Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                            RemoveSelf();
+                        }
+                        break;
+                    }
+                case Global.DIR_LEFT:
+                    {
+                        circCenterX -= bulletSpeed;
+                        Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
+                        X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
+
+                        //jb - udpated to make the bullets collide with solid map objectss
+                        newX = X + bulletSpeed;
+                        if (scene.grid.GetRect(newX, Y, newX + WIDTH, Y + HEIGHT, false))
+                        {
+                            Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                            RemoveSelf();
+                        }
+                        break;
+                    }
+                case Global.DIR_RIGHT:
+                    {
+                        circCenterX += bulletSpeed;
+                        Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
+                        X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
+
+                        //jb - udpated to make the bullets collide with solid map objectss
+                        newX = X - bulletSpeed;
+                        if (scene.grid.GetRect(newX, Y, newX + WIDTH, Y + HEIGHT, false))
+                        {
+                            Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                            RemoveSelf();
+                        }
+
+                        break;
+                    }
+            }
+
+            //Reset the angle after it's done a complete 360
+            if (circAngle + circRotationSpeed >= 360)
+            {
+                circAngle = 0.0;
+            }
+            else
+            {
+                circAngle += circRotationSpeed;
+            }
+        }
+
+
         public override void Update()
         {
             base.Update();
@@ -228,11 +385,12 @@ namespace OtterTutorial.Entities
 
             if (shooter == "enemy")
             {
-                EnemyBulletMovement(checkScene);
+                EnemyBulletMovement(ref checkScene);
             }
             else
             {
-                PlayerBulletMovement(checkScene);
+                CircularMovement(ref checkScene);
+                //PlayerBulletMovement(ref checkScene);
             }
             if (distanceTraveled % 60 == 0)
             {

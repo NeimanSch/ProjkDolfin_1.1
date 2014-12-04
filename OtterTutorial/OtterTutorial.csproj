@@ -52,9 +52,11 @@
     <Compile Include="Entities\Boss.cs" />
     <Compile Include="Entities\BossBullet.cs" />
     <Compile Include="Entities\Bullet.cs" />
+    <Compile Include="Entities\BulletData.cs" />
     <Compile Include="Entities\Enemy.cs" />
     <Compile Include="Entities\Item.cs" />
     <Compile Include="Entities\Player.cs" />
+    <Compile Include="Entities\Weapon.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -62,6 +64,9 @@
     <Compile Include="Scenes\GameScene.cs" />
     <Compile Include="Scenes\TitleScene.cs" />
     <Compile Include="Util\CameraShaker.cs" />
+    <Compile Include="Util\Map.cs" />
+    <Compile Include="Util\Room.cs" />
+    <Compile Include="Util\SpawnPoint.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

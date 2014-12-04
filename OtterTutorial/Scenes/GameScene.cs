@@ -2,7 +2,7 @@
 
 using OtterTutorial.Entities;
 using OtterTutorial.Util;
-
+using MapGen;
 using System;
 using System.IO;
 
@@ -13,10 +13,11 @@ namespace OtterTutorial.Scenes
         public Music gameMusic = new Music(Assets.MUSIC_GAME);
 
         // Our Tilemap's calculated width and height
-        public const int WIDTH = Global.GAME_WIDTH * 3;
-        public const int HEIGHT = Global.GAME_HEIGHT * 2;
+        public const int WIDTH = Global.GAME_WIDTH * 8;
+        public const int HEIGHT = Global.GAME_HEIGHT * 8;
         public const float HALF_SCRENE_X = Global.GAME_WIDTH / 2;
         public const float HALF_SCRENE_Y = Global.GAME_HEIGHT / 2;
+        public Map planetMap = null;
         public Tilemap tilemap = null;
         public GridCollider grid = null;
 
@@ -48,6 +49,15 @@ namespace OtterTutorial.Scenes
 
             string mapToLoad = Assets.MAP_WORLD;
             string solidsToLoad = Assets.MAP_SOLID;
+
+            //GENERATE THAT MAP!
+            planetMap = new Map();
+            planetMap.GenerateMap(100, 100, 30, 5, 10, 5, 10, 5, 4, 8, 3, 3, 1);
+
+            //Set the player's landing/spawning coordinates
+            Global.player.X = planetMap.mapPlayerSpawnLocation.Item1;
+            Global.player.Y = planetMap.mapPlayerSpawnLocation.Item2;
+
             LoadWorld(mapToLoad, solidsToLoad);
             // Since we are constantly switching Scenes we need to do some checking,
             // ensuring that the music doesn't get restarted.
@@ -86,21 +96,20 @@ namespace OtterTutorial.Scenes
             // This is rather crude, as we re-add the Enemy every time we switch screens
             // A good task beyond these tutorials would be ensuring that non-player
             // Entities retain their state upon switching screens
-            Add(new Enemy(500, 400));
-
-            //Add(new Item(100, 100, "t"));
-
-            Add(Global.boss);
+            foreach (Tuple<float, float> enemyLoc in planetMap.mapEnemySpawnLocations)
+            {
+                Add(new Enemy(enemyLoc.Item1, enemyLoc.Item2));
+            }
         }
 
         private void LoadWorld(string map, string solids)
         {
             // Get our CSV map in string format and load it via our tilemap
-            string newMap = CSVToString(map);
+            string newMap = planetMap.MapToString();
             tilemap.LoadCSV(newMap);
 
             // Get our csv solid map and load it into our GridCollider
-            string newSolids = CSVToString(solids);
+            string newSolids = planetMap.CollisionMapToString();
             grid.LoadCSV(newSolids);
         }
 
