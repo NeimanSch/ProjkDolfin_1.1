@@ -35,8 +35,8 @@ namespace OtterTutorial
         }
 
         // These variables will be used when creating our Tilemap related objects
-        public const int GAME_WIDTH = 640;
-        public const int GAME_HEIGHT = 480;
+        public const int GAME_WIDTH = 1280;
+        public const int GAME_HEIGHT = 960;
         public const int GRID_WIDTH = 32;
         public const int GRID_HEIGHT = 32;
 
