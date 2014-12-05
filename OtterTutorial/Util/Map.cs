@@ -755,7 +755,7 @@ namespace MapGen
         private void SetEnemySpawns()
         {
             Random r = new Random();
-            int numOfEnemies = 1;
+            int numOfEnemies = 100;
             int enemyCounter = 0;
 
             while(enemyCounter < numOfEnemies)

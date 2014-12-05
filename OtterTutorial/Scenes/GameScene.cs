@@ -52,7 +52,7 @@ namespace OtterTutorial.Scenes
 
             //GENERATE THAT MAP!
             planetMap = new Map();
-            planetMap.GenerateMap(100, 100, 30, 5, 10, 5, 10, 5, 4, 8, 3, 3, 1);
+            planetMap.GenerateMap(100, 100, 1, 55, 100, 55, 100, 0, 4, 8, 3, 3, 1);
 
             //Set the player's landing/spawning coordinates
             Global.player.X = planetMap.mapPlayerSpawnLocation.Item1;
@@ -96,10 +96,21 @@ namespace OtterTutorial.Scenes
             // This is rather crude, as we re-add the Enemy every time we switch screens
             // A good task beyond these tutorials would be ensuring that non-player
             // Entities retain their state upon switching screens
+            int i = 3;
             foreach (Tuple<float, float> enemyLoc in planetMap.mapEnemySpawnLocations)
             {
-                Add(new Enemy(enemyLoc.Item1, enemyLoc.Item2));
+                if ((Global.player.X >= enemyLoc.Item1) && (enemyLoc.Item1 < Global.player.X + 32))
+                {
+
+                    Add(new Enemy(enemyLoc.Item1 + 40, enemyLoc.Item2, i));
+                }
+                else
+                {
+                    Add(new Enemy(enemyLoc.Item1, enemyLoc.Item2, i));
+                }
+                //i += 1;
             }
+
         }
 
         private void LoadWorld(string map, string solids)

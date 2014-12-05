@@ -34,7 +34,7 @@ namespace OtterTutorial.Util
                 priorCameraY = this.Scene.CameraY;
 
                 // Set shakeCamera to true, and our shake duration
-                shakeCamera = true;
+                shakeCamera = false;
                 shakeFrames = shakeDur;
             }
         }

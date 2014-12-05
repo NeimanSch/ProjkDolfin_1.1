@@ -13,12 +13,14 @@ namespace OtterTutorial.Entities
         public const int HEIGHT = 40;
         public const float DIAGONAL_SPEED = 1.4f;
 
-        public float moveSpeed = 4.0f;
+        public float moveSpeed = 10f;
+        public float maxSpeed = 10f;
 
         // Our entity's graphic will be a Spritemap
         public Spritemap<string> sprite;
 
         public int direction = 0;
+        public bool stopMovement = false;
 
         public bool dead = false;
 
@@ -127,78 +129,40 @@ namespace OtterTutorial.Entities
             {
                 verticalMovement = false;
             }
-
-            // If we are not moving play our idle animations
-            // Currently our spritesheet lacks true idle
-            // animations, but this helps get the idea across
-            if (!horizontalMovement && !verticalMovement)
-            {
-                if (sprite.CurrentAnim.Equals("walkLeft"))
-                {
-                    sprite.Play("standLeft");
-                }
-                else if (sprite.CurrentAnim.Equals("walkRight"))
-                {
-                    sprite.Play("standRight");
-                }
-                else if (sprite.CurrentAnim.Equals("walkDown"))
-                {
-                    sprite.Play("standDown");
-                }
-                else if (sprite.CurrentAnim.Equals("walkUp"))
-                {
-                    sprite.Play("standUp");
-                }
-            }
-
             // CHECK FOR WEAPON SHOOTAN
             equippedWeapon.fire();
-
             // Add particles if the player is moving in any direction
             if (verticalMovement || horizontalMovement)
             {
-                /*
-                // Add walking particles
-                float particleXBuffer = 0;
-                float particleYBuffer = 0;
-                switch (direction)
-                {
-                    case Global.DIR_UP:
-                        {
-                            particleXBuffer = Otter.Rand.Float(8, 24);
-                            particleYBuffer = Otter.Rand.Float(0, 5);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + particleXBuffer, Y + 40));
-                            break;
-                        }
-                    case Global.DIR_DOWN:
-                        {
-                            particleXBuffer = Otter.Rand.Float(8, 24);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + particleXBuffer, Y));
-                            break;
-                        }
-                    case Global.DIR_LEFT:
-                        {
-                            particleYBuffer = Otter.Rand.Float(-2, 2);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + 32 - 3, Y + 40 + particleYBuffer));
-                            break;
-                        }
-                    case Global.DIR_RIGHT:
-                        {
-                            particleYBuffer = Otter.Rand.Float(-2, 2);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + 3, Y + 40 + particleYBuffer));
-                            break;
-                        }
-                }
-                */
                 if (verticalMovement && horizontalMovement)
                 {
-                    X += xSpeed / DIAGONAL_SPEED;
-                    Y += ySpeed / DIAGONAL_SPEED;
+                    var colle = Collider.Collide((X + xSpeed / DIAGONAL_SPEED + 10 ), (Y + ySpeed / DIAGONAL_SPEED + 10), (int)Global.Type.ENEMY);
+                    if (colle != null)
+                    {
+                        Console.Write("Collision \n");
+                        X = X;
+                        Y = Y;
+                    }
+                    else
+                    {
+                        X += xSpeed;
+                        Y += ySpeed;
+                    }
                 }
                 else
                 {
-                    X += xSpeed;
-                    Y += ySpeed;
+                    var colle = Collider.Collide((X + xSpeed + 10), (Y + ySpeed + 10), (int)Global.Type.ENEMY);
+                    if (colle != null)
+                    {
+                        Console.Write("Collision \n");
+                        X = X;
+                        Y = Y;
+                    }
+                    else
+                    {
+                        X += xSpeed;
+                        Y += ySpeed;
+                    }
                 }
             }
             var collb = Collider.Collide(X, Y, (int)Global.Type.BOSS_BULLET);
@@ -211,6 +175,7 @@ namespace OtterTutorial.Entities
                 Global.TUTORIAL.Scene.Add(new Explosion(X, Y, true));
                 RemoveSelf();
             }
+            
 
             var colli = Collider.Collide(X, Y, (int)Global.Type.ITEM);
             if (colli != null)
@@ -218,10 +183,35 @@ namespace OtterTutorial.Entities
                 Item i = (Item)colli.Entity;
                 if (i.attributes.ContainsKey("movementSpeed"))
                 {
-                    moveSpeed = moveSpeed * (int)i.attributes["movementSpeed"];
+                    if (moveSpeed * (int)i.attributes["movementSpeed"] <= maxSpeed)
+                    {
+                        moveSpeed = moveSpeed * (int)i.attributes["movementSpeed"];
+                    }
+                    else
+                    {
+                        moveSpeed = maxSpeed;
+                    }
                 }
                 i.RemoveSelf();
             }
+        }
+
+        public bool EnemyColl()
+        {
+            var colle = Collider.Collide(X, Y, (int)Global.Type.ENEMY);
+            if (colle != null)
+            {
+                Console.Write("Collision \n");
+                Enemy e = (Enemy)colle.Entity;
+                e.RemoveSelf();
+                return true;
+            }
+            else
+            {
+                Console.Write("No Collision \n");
+                return false;
+            }
+
         }
     }
 }
