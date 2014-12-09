@@ -17,6 +17,8 @@ namespace OtterTutorial
 
         public static Player player = null;
 
+        public static Random rand = new Random();
+
         public const int DIR_UP = 0;
         public const int DIR_DOWN = 1;
         public const int DIR_LEFT = 2;

@@ -13,14 +13,11 @@ namespace OtterTutorial.Entities
         public int iceDamage;
         public int fireRate;
         public int fireCooldown;
-        public int bulletRange;
-        public int bulletSpeed;
         public int bulletCount;
-        public int bulletHeight;
-        public int bulletWidth;
         public int tier;
         public int level;
         public Bullet bullet;
+        public List<BulletData> clip;
 
         public Weapon()
         {
@@ -28,6 +25,7 @@ namespace OtterTutorial.Entities
             fireDamage = 0;
             iceDamage = 0;
             fireRate = 100;
+            clip = new List<BulletData>();
 
             GenerateWeapon();
         }
@@ -36,14 +34,72 @@ namespace OtterTutorial.Entities
         public void GenerateWeapon()
         {
             Random r = new Random();
-
-            fireRate = 5;//r.Next(5, 50);
+            int evenAngle = 0;
+            int evenBulletCount = 0;
+            int oddAngle = 0;
+            int oddBulletCount = 0;
+            int angle = 0;
+            fireRate = r.Next(5, 50);
             baseDamage = r.Next(5, 50);
-            bulletRange = r.Next(100, 500);//
-            bulletSpeed = 2;// r.Next(5, 8);
-            bulletWidth = r.Next(10, 20); //need to look into what's up with this
-            bulletHeight = r.Next(10, 20);//this doesn't seem to do much currently
             bulletCount = r.Next(1, 10);
+            Console.WriteLine(bulletCount);
+
+            //All the below code is for figuring out how to angle the projectiles.
+            if (bulletCount % 2 == 0)
+            {
+                //The player's "field of fire" is 180 degrees 
+                if(bulletCount == 2)
+                {
+                    evenAngle = 90 / 2;
+                    oddAngle = 0; //doesn't matter since it won't exists
+                }
+                else
+                {
+                    evenAngle = 90 / (bulletCount / 2);
+                    oddAngle = (90 / ((bulletCount - 1) / 2)) * -1;
+                }
+
+            }
+            else
+            {
+                if(bulletCount == 1)
+                {
+                    evenAngle = 0;
+                    oddAngle = 0;
+                }
+                else if(bulletCount == 3)
+                {
+                    evenAngle = 90 / 2;
+                    oddAngle = 90 / 2 * -1;
+                }
+                else
+                {
+                    evenAngle = 90 / (bulletCount - 1);
+                    oddAngle = evenAngle * -1;
+                }
+            }
+
+            for(int bullet = 1; bullet <= bulletCount; bullet++)
+            {
+                if(bullet == 1)
+                {
+                    angle = 0;
+                    
+                }
+                else if(bullet % 2 == 0)
+                {
+                    evenBulletCount++;
+                    angle = evenAngle * evenBulletCount;
+                }
+                else
+                {
+                    oddBulletCount++;
+                    angle = oddAngle * oddBulletCount;
+                }
+
+                clip.Add(new BulletData(angle));
+                
+            }
         }
 
         //Shoot that shit!
@@ -76,7 +132,11 @@ namespace OtterTutorial.Entities
 
                 if (direction != -1)
                 {
-                    Global.TUTORIAL.Scene.Add(new Bullet(Global.player.X, Global.player.Y, direction, "player", bulletHeight, bulletWidth, (float)bulletRange, (float)bulletSpeed));
+                    foreach(BulletData bullet in clip)
+                    {
+                        Global.TUTORIAL.Scene.Add(new Bullet(bullet, Global.player.X, Global.player.Y, direction, "player"));
+                    }
+                    
                     fireCooldown = fireRate;
                 }
             }
