@@ -31,6 +31,8 @@ namespace OtterTutorial.Entities
 
         // left = true, right = false
         public bool direction = true;
+        public bool flipDir = false;
+        public bool shoot = false;
         // Used to keep track of the enemy distance moved
         public float distMoved = 0f;
 
@@ -39,45 +41,50 @@ namespace OtterTutorial.Entities
         public float xDiff = 0;
         public float yDiff = 0;
         public double pDist = 0;
-        public string type;
+        public int type;
         public string state;
+        public float distance = 0;
+        public double circRotationSpeed = 0.2;
+        public double circAngle = 0.0;
 
         public Enemy(float x, float y)
             : base(x, y)
         {
             health = DEFAULT_HEALTH;
             speed = DEFAULT_SPEED;
-            type = "1";
+            type = 1;
             state = "idle";
 
             // Set up the Spritemap in the same manner we did for the player
             sprite = new Spritemap<string>(Assets.ENEMY_SPRITE, 32, 40);
-            sprite.Add("standLeft", new int[] { 6 }, new float[] { 10f, 10f });
-            sprite.Add("standRight", new int[] { 6 }, new float[] { 10f, 10f });
-            sprite.Add("standDown", new int[] { 0 }, new float[] { 10f, 10f });
-            sprite.Add("standUp", new int[] { 3 }, new float[] { 10f, 10f });
-            sprite.Add("walkLeft", new int[] { 6, 7, 8 }, new float[] { 15f });
-            sprite.Add("walkRight", new int[] { 6,7,8 }, new float[] { 15f });
-            sprite.Add("walkDown", new int[] { 0,1,2 }, new float[] { 15f });
-            sprite.Add("walkUp", new int[] { 3,4,5 }, new float[] { 15f });
+            sprite.Add("standLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
+            sprite.Add("standRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
+            sprite.Add("standDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
+            sprite.Add("standUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
+            sprite.Add("walkLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
+            sprite.Add("walkRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
+            sprite.Add("walkDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
+            sprite.Add("walkUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
             sprite.Play("standLeft");
 
             Graphic = sprite;
-            Graphic.Scale = 1.5f;
 
             // Set our Enemy hitbox to be 32 x 40. This goes in our Enemy class
             SetHitbox(32, 40, (int)Global.Type.ENEMY);
 
             enemyFireCounter = 0;
+
+            Random startDeg = new Random();
+            circAngle = startDeg.Next(0, 360);
         }
 
-        public Enemy(float x, float y, string t)
+        public Enemy(float x, float y, int t)
             : this(x, y)
         {
             type = t;
         }
 
-        public Enemy(float x, float y, string t, string s)
+        public Enemy(float x, float y, int t, string s)
             : this(x, y, t)
         {
             state = s;
@@ -86,6 +93,11 @@ namespace OtterTutorial.Entities
         public override void Update()
         {
             base.Update();
+
+            if (Global.paused)
+            {
+                return;
+            }
 
             // Access the Enemy's Collider to check collision
             var collb = Collider.Collide(X, Y, (int)Global.Type.BULLET);
@@ -96,10 +108,6 @@ namespace OtterTutorial.Entities
                 {
                     b.Destroy();
 
-                    // Shake the camera when a Bullet hits an Enemy
-                    // and then add a new DamageText object with the
-                    // abritary string "1234". Lastly add it to our Scene
-                    //Global.camShaker.ShakeCamera();
                     DamageText dt = new DamageText(X, Y, "1234");
                     Global.TUTORIAL.Scene.Add(dt);
 
@@ -111,15 +119,15 @@ namespace OtterTutorial.Entities
                         // Add a new Explosion and remove self from the Scene if out of health
                         Global.TUTORIAL.Scene.Add(new Explosion(X, Y));
                         Global.TUTORIAL.Scene.Add(new Item(X, Y));
+                        Global.player.score++;
                         RemoveSelf();
                     }
                 }
             }
             // If going left, flip the spritesheet
-            //sprite.FlippedX = direction;
-            //sprite.Play("walkLeft");
+            sprite.FlippedX = direction;
             Move();
-            if ((enemyFireCounter % 100) == 0)
+            if ((enemyFireCounter % 100 == 0) && shoot)
             {
                 Global.TUTORIAL.Scene.Add(new Bullet(X, Y, "enemy"));
             }
@@ -131,69 +139,187 @@ namespace OtterTutorial.Entities
             xDiff = Global.player.X - X;
             yDiff = Global.player.Y - Y;
             pDist = Math.Sqrt(Math.Pow(xDiff, 2) + Math.Pow(yDiff, 2));
-            float newPOS = 0;
+            float newPOS = 0;    
             GameScene checkScene = (GameScene)Scene;
             switch (type)
             {
-                case "1":
+                case 1:
                     if (pDist > 200)
                     {
-                        if (xDiff < 0)
-                        {
-                            newPOS = X - speed;
-                            sprite.Play("walkLeft");
-                            sprite.FlippedX = false;
-                            if (!CheckGridCollisions(checkScene, newPOS, true))
-                            {
-                                X -= speed;
-                            }
-                        }
-                        else
-                        {
-                            newPOS = X + speed;
-                            sprite.Play("walkRight");
-                            sprite.FlippedX = true;
-                            if (!CheckGridCollisions(checkScene, newPOS, true))
-                            {
-                                X += speed;
-                            }
-                        }//xdiff
-
-                        if (yDiff < 0)
-                        {
-                            newPOS = Y - speed;
-                            if (Math.Abs(yDiff) > Math.Abs(xDiff))
-                            {
-                                sprite.Play("walkUp");
-                            }
-                            if (!CheckGridCollisions(checkScene, newPOS, false))
-                            {
-                                Y -= speed;
-                            }
-                        }
-                        else
-                        {
-                            newPOS = Y + speed;
-                            if (Math.Abs(yDiff) > Math.Abs(xDiff))
-                            {
-                                sprite.Play("walkDown");
-                            }
-                            if (!CheckGridCollisions(checkScene, newPOS, false))
-                            {
-                                Y += speed;
-                            }
-                        } //yDiff
-
+                        follow(newPOS, checkScene);
+                        shoot = false;
+                    }
+                    else
+                    {
+                        shoot = true;
                     }
                     break;
-                case "2":
-
+                case 2:
+                    //shoot = true;
+                    distance++;
+                    sineWave(newPOS, checkScene);
                     break;
-                case "3":
-
+                case 3:
+                    distance++;
+                        if (distance >= 100)
+                        {
+                            if (flipDir == false)
+                            {
+                                flipDir = true;
+                            }
+                            else
+                            {
+                                flipDir = false;
+                            }
+                            distance = 0;
+                        }
+                    switch (state)
+                    {
+                        
+                        case "idle":
+                            sineWave(newPOS, checkScene);
+                            if (pDist <= 300)
+                            {
+                                state = "aware";
+                                shoot = true;
+                            }
+                            break;
+                        case "aware":
+                            follow(newPOS, checkScene);
+                            if (pDist >= 300)
+                            {
+                                state = "idle";
+                                shoot = false;
+                            }
+                            break;
+                    }
                     break;
             }
         }
+
+        public void follow(float n, GameScene s)
+        {
+            if (pDist > 20)
+            {
+                if (xDiff < 20)
+                {
+                    n = X - speed;
+                    if (!CheckGridCollisions(s, n, true))
+                    {
+                        var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                         if (colle != null)
+                         {
+                             X = X;
+                         }
+                         else
+                         {
+                             X -= speed;
+                         }
+                    }
+                }
+                else if (xDiff > 20)
+                {
+                    n = X + speed;
+                    if (!CheckGridCollisions(s, n, true))
+                    {
+                        var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                        if (colle != null)
+                        {
+                            X = X;
+                        }
+                        else
+                        {
+                            X += speed;
+                        }
+                    }
+                }
+                if (yDiff < 20)
+                {
+                    n = Y - speed;
+                    if (!CheckGridCollisions(s, n, false))
+                    {
+                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                        if (colle != null)
+                        {
+                            Y = Y;
+                        }
+                        else
+                        {
+                            Y -= speed;
+                        }
+                    }
+                }
+                else if (yDiff > 20)
+                {
+                    n = Y + speed;
+                    if (!CheckGridCollisions(s, n, false))
+                    {
+                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                        if (colle != null)
+                        {
+                            Y = Y;
+                        }
+                        else
+                        {
+                            Y += speed;
+                        }
+                    }
+                }
+            }
+        }
+        public void sineWave(float n, GameScene s)
+        {
+            if (distance >= 100)
+            {
+                if (flipDir == false)
+                {
+                    flipDir = true;
+                }
+                else
+                {
+                    flipDir = false;
+                }
+                distance = 0;
+            }
+            n = (float)(Y + 10 * Math.Cos(circAngle));
+            if (!CheckGridCollisions(s, n, false))
+            {
+                var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                if (colle != null)
+                {
+                    Y = Y;
+                }
+                else
+                {
+                    Y = (float)(Y + 10 * Math.Cos(circAngle));
+                }
+            }
+            if (circAngle + circRotationSpeed >= 360)
+            {
+                circAngle = 0.0;
+            }
+            else
+            {
+                circAngle += circRotationSpeed;
+            }
+            if (flipDir)
+            {
+                n = X - speed;
+                if (!CheckGridCollisions(s, n, true))
+                {
+                    X -= speed;
+                }
+            }
+            else
+            {
+                n = X + speed;
+                if (!CheckGridCollisions(s, n, true))
+                {
+                    X += speed;
+                }
+            }
+        }
+
         // checks if there is a collision with the solids grid
         //  takes a GameSceen (scene), speed/distance to move (p),
         //  true or false for p direction (xAxis)
