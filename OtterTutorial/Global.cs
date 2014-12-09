@@ -42,5 +42,10 @@ namespace OtterTutorial
 
         public static bool paused = false;
         public static Music gameMusic = null;
+
+        public void Paused()
+        {
+            
+        }
     }
 }
