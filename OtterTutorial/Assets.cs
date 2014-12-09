@@ -10,7 +10,7 @@ namespace OtterTutorial
     {
         public const string TITLE_IMG = "../../Assets/Graphics/otter.jpg";
 
-        public const string FONT_PANIC = "../../Assets/Fonts/PanicStricken.ttf";
+        public const string FONT_PANIC = "../../Assets/Fonts/SpaceAge.ttf";
 
         public const string MUSIC_TITLE = "../../Assets/Music/menu.ogg";
         public const string MUSIC_GAME = "../../Assets/Music/game.ogg";
