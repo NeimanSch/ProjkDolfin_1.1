@@ -170,6 +170,7 @@ namespace OtterTutorial.Entities
                 }
             }
 
+            
             // CHECK FOR WEAPON SHOOTAN
             equippedWeapon.fire();
 
