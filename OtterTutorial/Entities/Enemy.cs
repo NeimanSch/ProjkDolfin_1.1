@@ -73,6 +73,9 @@ namespace OtterTutorial.Entities
             SetHitbox(32, 40, (int)Global.Type.ENEMY);
 
             enemyFireCounter = 0;
+
+            Random startDeg = new Random();
+            circAngle = startDeg.Next(0, 360);
         }
 
         public Enemy(float x, float y, int t)
@@ -91,6 +94,11 @@ namespace OtterTutorial.Entities
         {
             base.Update();
 
+            if (Global.paused)
+            {
+                return;
+            }
+
             // Access the Enemy's Collider to check collision
             var collb = Collider.Collide(X, Y, (int)Global.Type.BULLET);
             if (collb != null)
@@ -100,10 +108,6 @@ namespace OtterTutorial.Entities
                 {
                     b.Destroy();
 
-                    // Shake the camera when a Bullet hits an Enemy
-                    // and then add a new DamageText object with the
-                    // abritary string "1234". Lastly add it to our Scene
-                    //Global.camShaker.ShakeCamera();
                     DamageText dt = new DamageText(X, Y, "1234");
                     Global.TUTORIAL.Scene.Add(dt);
 
@@ -115,6 +119,7 @@ namespace OtterTutorial.Entities
                         // Add a new Explosion and remove self from the Scene if out of health
                         Global.TUTORIAL.Scene.Add(new Explosion(X, Y));
                         Global.TUTORIAL.Scene.Add(new Item(X, Y));
+                        Global.player.score++;
                         RemoveSelf();
                     }
                 }
@@ -142,20 +147,20 @@ namespace OtterTutorial.Entities
                     if (pDist > 200)
                     {
                         follow(newPOS, checkScene);
-                        shoot = true;
+                        shoot = false;
                     }
                     else
                     {
-                        shoot = false;
+                        shoot = true;
                     }
                     break;
                 case 2:
                     //shoot = true;
-                    distance += 1;
+                    distance++;
                     sineWave(newPOS, checkScene);
                     break;
                 case 3:
-                    distance += 1;
+                    distance++;
                         if (distance >= 100)
                         {
                             if (flipDir == false)
@@ -201,22 +206,14 @@ namespace OtterTutorial.Entities
                     n = X - speed;
                     if (!CheckGridCollisions(s, n, true))
                     {
-                         var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY);
+                        var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
                          if (colle != null)
                          {
                              X = X;
                          }
                          else
                          {
-                             var collp = Collider.Collide(n, (Y), (int)Global.Type.PLAYER);
-                             if (collp != null)
-                             {
-                                 X = X;
-                             }
-                             else
-                             {
-                                 X -= speed;
-                             }
+                             X -= speed;
                          }
                     }
                 }
@@ -225,22 +222,14 @@ namespace OtterTutorial.Entities
                     n = X + speed;
                     if (!CheckGridCollisions(s, n, true))
                     {
-                        var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY);
+                        var colle = Collider.Collide(n, (Y), (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
                         if (colle != null)
                         {
                             X = X;
                         }
                         else
                         {
-                            var collp = Collider.Collide(n, (Y), (int)Global.Type.PLAYER);
-                            if (collp != null)
-                            {
-                                X = X;
-                            }
-                            else
-                            {
-                                X += speed;
-                            }
+                            X += speed;
                         }
                     }
                 }
@@ -249,22 +238,14 @@ namespace OtterTutorial.Entities
                     n = Y - speed;
                     if (!CheckGridCollisions(s, n, false))
                     {
-                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY);
+                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
                         if (colle != null)
                         {
                             Y = Y;
                         }
                         else
                         {
-                            var collp = Collider.Collide(X, n, (int)Global.Type.PLAYER);
-                            if (collp != null)
-                            {
-                                Y = Y;
-                            }
-                            else
-                            {
-                                Y -= speed;
-                            }
+                            Y -= speed;
                         }
                     }
                 }
@@ -273,22 +254,14 @@ namespace OtterTutorial.Entities
                     n = Y + speed;
                     if (!CheckGridCollisions(s, n, false))
                     {
-                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY);
+                        var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
                         if (colle != null)
                         {
                             Y = Y;
                         }
                         else
                         {
-                            var collp = Collider.Collide(X, n, (int)Global.Type.PLAYER);
-                            if (collp != null)
-                            {
-                                Y = Y;
-                            }
-                            else
-                            {
-                                Y += speed;
-                            }
+                            Y += speed;
                         }
                     }
                 }
@@ -308,18 +281,15 @@ namespace OtterTutorial.Entities
                 }
                 distance = 0;
             }
-            if (yDiff < 0)
+            n = (float)(Y + 10 * Math.Cos(circAngle));
+            if (!CheckGridCollisions(s, n, false))
             {
-                n = (float)(Y + 10 * Math.Cos(circAngle));
-                if (!CheckGridCollisions(s, n, false))
+                var colle = Collider.Collide(X, n, (int)Global.Type.ENEMY, (int)Global.Type.PLAYER);
+                if (colle != null)
                 {
-                    Y = (float)(Y + 10 * Math.Cos(circAngle));
+                    Y = Y;
                 }
-            }
-            else
-            {
-                n = (float)(Y + 10 * Math.Cos(circAngle));
-                if (!CheckGridCollisions(s, n, false))
+                else
                 {
                     Y = (float)(Y + 10 * Math.Cos(circAngle));
                 }

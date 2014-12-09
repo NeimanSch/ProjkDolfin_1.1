@@ -30,7 +30,7 @@ namespace OtterTutorial.Effects
             bulletExplodeSnd.Play();
 
             // Shake the camera each time we explode
-            Global.camShaker.ShakeCamera();
+            //Global.camShaker.ShakeCamera();
         }
     }
 }

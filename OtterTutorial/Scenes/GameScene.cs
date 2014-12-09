@@ -1,10 +1,13 @@
 ﻿using Otter;
-
+using OtterTutorial;
 using OtterTutorial.Entities;
 using OtterTutorial.Util;
 using MapGen;
 using System;
+using System.Text;
 using System.IO;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace OtterTutorial.Scenes
 {
@@ -27,6 +30,14 @@ namespace OtterTutorial.Scenes
         // confusion with our already existing X,Y coordinate systems
         public int screenJ;
         public int screenI;
+        public Text scoreText;
+        public Text healthText;
+        public Text pauseText;
+        public Image Menu;
+        public Menu pauseMenu;
+        public Texture texture = new Texture(Assets.TILESET);
+        public Menu playerStats;
+                
 
         // Our new constructor takes in the new J,I coordinates, and a Player object
         public GameScene(int nextJ = 0, int nextI = 0, Player player = null)
@@ -46,6 +57,7 @@ namespace OtterTutorial.Scenes
             // Create and load our Tilemap and GridCollider
             tilemap = new Tilemap(Assets.TILESET, WIDTH, HEIGHT, Global.GRID_WIDTH, Global.GRID_HEIGHT);
             grid = new GridCollider(WIDTH, HEIGHT, Global.GRID_WIDTH, Global.GRID_HEIGHT);
+            
 
             string mapToLoad = Assets.MAP_WORLD;
             string solidsToLoad = Assets.MAP_SOLID;
@@ -110,7 +122,29 @@ namespace OtterTutorial.Scenes
                 }
                 //i += 1;
             }
-
+            
+            scoreText = new Text("Score: " + Global.player.score.ToString(), Assets.FONT_PANIC, 24);
+            scoreText.OutlineColor = new Otter.Color("7FA8D2");
+            scoreText.OutlineThickness = 3; 
+            scoreText.CenterOrigin();
+            scoreText.X = Global.player.X;
+            scoreText.Y = Global.player.Y;
+            healthText = new Text("Health: " + Global.player.health.ToString(), Assets.FONT_PANIC, 24);
+            healthText.OutlineColor = new Otter.Color("d2807f");
+            healthText.OutlineThickness = 3;
+            healthText.CenterOrigin();
+            healthText.X = Global.player.X;
+            healthText.Y = Global.player.Y;
+            playerStats = new Menu(Global.player.X, Global.player.Y, 20, Color.Cyan, healthText, scoreText);
+            playerStats.container.OutlineColor = Color.Cyan;
+            playerStats.container.OutlineThickness = 2f;
+            playerStats.container.Alpha = 0.3f;
+            pauseText = new Text("Game Paused", Assets.FONT_PANIC, 24);
+            pauseText.OutlineColor = new Otter.Color(Color.Gold);
+            pauseText.OutlineThickness = 3;
+            pauseText.CenterOrigin();
+            pauseText.X = Global.player.X;
+            pauseText.Y = Global.player.Y;
         }
 
         private void LoadWorld(string map, string solids)
@@ -144,12 +178,40 @@ namespace OtterTutorial.Scenes
 
         public override void Update()
         {
+            if (Global.PlayerSession.Controller.Select.Pressed)
+            {
+                if (!Global.paused)
+                {
+                    Global.paused = true;
+                }
+                else
+                {
+                    Global.paused = false;
+                    this.RemoveGraphic(pauseMenu.container);
+                    foreach (Text item in pauseMenu.items)
+                    {
+                        this.RemoveGraphic(item);
+                    }
+                }
+                return;
+            }
             if (Global.paused)
             {
+                DrawPauseMenu();
+
                 return;
+            }
+            else
+            {
+                
             }
             this.CameraX = Global.player.X - HALF_SCRENE_X;
             this.CameraY = Global.player.Y - HALF_SCRENE_Y;
+            playerStats.Update();
+            if (Global.paused)
+            {
+                pauseMenu.Update();
+            }
         }
 
         // Scroll method that moves the CameraX, CameraY
@@ -193,6 +255,11 @@ namespace OtterTutorial.Scenes
             nextScene.CameraX = CameraX;
             nextScene.CameraY = CameraY;
             Global.TUTORIAL.SwitchScene(nextScene);
+        }
+
+        public void DrawPauseMenu()
+        {
+            pauseMenu = new Menu(Global.player.X, Global.player.Y, 50, Color.Black, pauseText);
         }
     }
 }

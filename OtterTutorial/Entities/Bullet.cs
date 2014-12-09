@@ -49,6 +49,7 @@ namespace OtterTutorial.Entities
         public float yDiff = 0;
         public double pDist = 0;
         public string shooter;
+        public Vector2 shootPt;
 
         public Bullet(float x, float y)
         {
@@ -76,7 +77,7 @@ namespace OtterTutorial.Entities
             // Add this line to the Bullet.cs class
             // Set the Bullet hitbox to 16x14
             SetHitbox(16, 14, (int)Global.Type.BULLET);
-
+            shootPt = new Vector2(Global.player.X, Global.player.Y);
         }
 
         public Bullet(float x, float y, int dir)
@@ -111,6 +112,53 @@ namespace OtterTutorial.Entities
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            if (Global.paused)
+            {
+                return;
+            }
+
+            GameScene checkScene = (GameScene)Scene;
+
+            if (shooter == "enemy")
+            {
+                if (true)
+                {
+                    EnemyBulletMovement(ref checkScene, shootPt);
+                }
+                else
+                {
+                    EnemyBulletMovement(ref checkScene, new Vector2(Global.player.X,Global.player.Y));
+                }
+            }
+            else
+            {
+                CircularMovement(ref checkScene);
+                //PlayerBulletMovement(ref checkScene);
+            }
+            if (distanceTraveled % 60 == 0)
+            {
+                Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
+            }
+
+            // If we have traveled the max distance or more, then
+            // the bullet will remove itself from the current Scene
+            distanceTraveled += bulletSpeed;
+            if (distanceTraveled >= maxDistance)
+            {
+                //Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                RemoveSelf();
+            }
+
+            // Add a new BulletTrail particle every 60 pixels traveled
+            if (distanceTraveled % 60 == 0)
+            {
+                //Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
+            }
+        }
 
         /**
          * This method handles the offset of the bullet when shooting in a circular pattern.
@@ -163,10 +211,10 @@ namespace OtterTutorial.Entities
             return collision;
         }
 
-        public void EnemyBulletMovement(ref GameScene scene)
+        public void EnemyBulletMovement(ref GameScene scene, Vector2 vec)
         {
-            xDiff = Global.player.X - X;
-            yDiff = Global.player.Y - Y;
+            xDiff = vec.X - X;
+            yDiff = vec.Y - Y;
             pDist = Math.Sqrt(Math.Pow(xDiff, 2) + Math.Pow(yDiff, 2));
             float newPOS = 0;
             if (xDiff < 0)
@@ -225,6 +273,14 @@ namespace OtterTutorial.Entities
             {
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
                 RemoveSelf();
+            }
+            var collp = Collider.Collide(X, Y, (int)Global.Type.PLAYER);
+            if (collp != null)
+            {
+                Player p = (Player)collp.Entity;
+                p.TakeDamage(1);
+                this.RemoveSelf();
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
             }
         }
 
@@ -377,43 +433,6 @@ namespace OtterTutorial.Entities
         }
 
 
-        public override void Update()
-        {
-            base.Update();
-
-            GameScene checkScene = (GameScene)Scene;
-
-            if (shooter == "enemy")
-            {
-                EnemyBulletMovement(ref checkScene);
-            }
-            else
-            {
-                CircularMovement(ref checkScene);
-                //PlayerBulletMovement(ref checkScene);
-            }
-            if (distanceTraveled % 60 == 0)
-            {
-                Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
-            }
-
-            // If we have traveled the max distance or more, then
-            // the bullet will remove itself from the current Scene
-            distanceTraveled += bulletSpeed;
-            if (distanceTraveled >= maxDistance)
-            {
-                //Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
-                RemoveSelf();
-            }
-
-            // Add a new BulletTrail particle every 60 pixels traveled
-            if (distanceTraveled % 60 == 0)
-            {
-                //Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
-            }
-        }
-
-        // Add this to your Bullet class, below your Update method
         public void Destroy()
         {
             RemoveSelf();

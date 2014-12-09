@@ -69,7 +69,6 @@ namespace MapGen
             buildingList = new List<Room>();
             mapPlayerSpawnLocation = new Tuple<float, float>(0, 0);
             mapEnemySpawnLocations = new List<Tuple<float, float>>();
-
         }
 
 
@@ -755,7 +754,7 @@ namespace MapGen
         private void SetEnemySpawns()
         {
             Random r = new Random();
-            int numOfEnemies = 100;
+            int numOfEnemies = 50;
             int enemyCounter = 0;
 
             while(enemyCounter < numOfEnemies)

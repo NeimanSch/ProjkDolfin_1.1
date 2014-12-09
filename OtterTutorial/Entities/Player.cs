@@ -12,6 +12,7 @@ namespace OtterTutorial.Entities
         public const int WIDTH = 32;
         public const int HEIGHT = 40;
         public const float DIAGONAL_SPEED = 1.4f;
+        public const int STARTING_HEALTH = 10;
 
         public float moveSpeed = 10f;
         public float maxSpeed = 10f;
@@ -27,11 +28,15 @@ namespace OtterTutorial.Entities
         //Weapon for testing
         public Weapon equippedWeapon;
 
+        public int score;
+        public int health;
+
         public Player(float x = 0, float y = 0)
         {
             // When creating a new player, the desired X,Y coordinates are passed in. If excluded, we start at 0,0
             X = x;
             Y = y;
+            health = STARTING_HEALTH;
             // Create a new spritemap, with the player.png image as our source, 32 pixels wide, and 40 pixels tall
             sprite = new Spritemap<string>(Assets.PLAYER2, 32, 40);
 
@@ -60,6 +65,11 @@ namespace OtterTutorial.Entities
         public override void Update()
         {
             base.Update();
+
+            if (Global.paused)
+            {
+                return;
+            }
 
             // Used to determine which directions we are moving in
             bool horizontalMovement = true;
@@ -139,7 +149,6 @@ namespace OtterTutorial.Entities
                     var colle = Collider.Collide((X + xSpeed / DIAGONAL_SPEED + 10 ), (Y + ySpeed / DIAGONAL_SPEED + 10), (int)Global.Type.ENEMY);
                     if (colle != null)
                     {
-                        Console.Write("Collision \n");
                         X = X;
                         Y = Y;
                     }
@@ -154,7 +163,6 @@ namespace OtterTutorial.Entities
                     var colle = Collider.Collide((X + xSpeed + 10), (Y + ySpeed + 10), (int)Global.Type.ENEMY);
                     if (colle != null)
                     {
-                        Console.Write("Collision \n");
                         X = X;
                         Y = Y;
                     }
@@ -173,10 +181,9 @@ namespace OtterTutorial.Entities
 
                 dead = true;
                 Global.TUTORIAL.Scene.Add(new Explosion(X, Y, true));
-                RemoveSelf();
+                Die();
             }
             
-
             var colli = Collider.Collide(X, Y, (int)Global.Type.ITEM);
             if (colli != null)
             {
@@ -196,22 +203,18 @@ namespace OtterTutorial.Entities
             }
         }
 
-        public bool EnemyColl()
+        public void TakeDamage(int d)
         {
-            var colle = Collider.Collide(X, Y, (int)Global.Type.ENEMY);
-            if (colle != null)
+            //health -= d;
+            if (health <= 0)
             {
-                Console.Write("Collision \n");
-                Enemy e = (Enemy)colle.Entity;
-                e.RemoveSelf();
-                return true;
+                Die();
             }
-            else
-            {
-                Console.Write("No Collision \n");
-                return false;
-            }
+        }
 
+        public void Die()
+        {
+            RemoveSelf();
         }
     }
 }
