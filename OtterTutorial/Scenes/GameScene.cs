@@ -52,7 +52,7 @@ namespace OtterTutorial.Scenes
 
             //GENERATE THAT MAP!
             planetMap = new Map();
-            planetMap.GenerateMap(100, 100, 30, 5, 10, 5, 10, 5, 4, 8, 3, 3, 1);
+            planetMap.GenerateMap(100, 100, 10, 5, 20, 5, 15, 0, 4, 16, 3, 3, 1);
 
             //Set the player's landing/spawning coordinates
             Global.player.X = planetMap.mapPlayerSpawnLocation.Item1;

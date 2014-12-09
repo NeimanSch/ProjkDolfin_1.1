@@ -42,7 +42,30 @@ namespace MapGen
         private static int[,] mapData;              //Numeric representation of map
         private static int[,] mapCollisionData;
         private static string[,] mapDisplayData;    //This is character display use for debugging
+        private Dictionary<string, int> tileMapDict;
 
+        /******** TILE MAP CONSTANTS ********/
+        public const int TILE_MAIN_GROUND = 16;
+        public const int TILE_MAIN_WALL = 15;
+
+        //The numbers below translate as so - 0(north)0(east)0(south)0(west) basically the numbers move clockwise starting with north. 
+        //Example: 0100 would mean that the wall has a connection on the right side only
+        public const int TILE_WALL_0000 = 0;
+        public const int TILE_WALL_1000 = 1;
+        public const int TILE_WALL_0100 = 2;
+        public const int TILE_WALL_1100 = 3; //Bottom Left Corner
+        public const int TILE_WALL_0010 = 4;
+        public const int TILE_WALL_1010 = 5;
+        public const int TILE_WALL_0110 = 6;
+        public const int TILE_WALL_1110 = 7;
+        public const int TILE_WALL_0001 = 8;
+        public const int TILE_WALL_1001 = 9;
+        public const int TILE_WALL_0101 = 10;
+        public const int TILE_WALL_1101 = 11;
+        public const int TILE_WALL_0011 = 12;
+        public const int TILE_WALL_1011 = 13;
+        public const int TILE_WALL_0111 = 14;
+        public const int TILE_WALL_1111 = 15;
 
         /************************************/
         /******** CONSTRUCTOR       *********/
@@ -69,6 +92,7 @@ namespace MapGen
             buildingList = new List<Room>();
             mapPlayerSpawnLocation = new Tuple<float, float>(0, 0);
             mapEnemySpawnLocations = new List<Tuple<float, float>>();
+            InitTileMapDictionary();
 
         }
 
@@ -82,6 +106,7 @@ namespace MapGen
         {
             InitMapData();
             BuildMap();
+            RefineTileMap();
             SetPlayerSpawn();
             SetEnemySpawns();
         }
@@ -109,6 +134,7 @@ namespace MapGen
 
             InitMapData();
             BuildMap();
+            RefineTileMap();
             SetPlayerSpawn();
             SetEnemySpawns();
         }
@@ -132,7 +158,7 @@ namespace MapGen
         }
 
 
-
+        
         public string MapToString()
         {
             string map = "";
@@ -181,12 +207,36 @@ namespace MapGen
             {
                 for (int x = 0; x < mapData.GetLength(1); x++)
                 {
-                    mapData[y, x] = 0;
+                    mapData[y, x] = TILE_MAIN_WALL;
                     mapCollisionData[y, x] = 1;
                     mapDisplayData[y, x] = "#";
                 }
             }
         }
+
+
+        private void InitTileMapDictionary()
+        {
+            tileMapDict = new Dictionary<string, int>();
+            tileMapDict.Add("TILE_WALL_0000", 0);
+            tileMapDict.Add("TILE_WALL_1000", 1);
+            tileMapDict.Add("TILE_WALL_0100", 2);
+            tileMapDict.Add("TILE_WALL_1100", 3);
+            tileMapDict.Add("TILE_WALL_0010", 4);
+            tileMapDict.Add("TILE_WALL_1010", 5);
+            tileMapDict.Add("TILE_WALL_0110", 6);
+            tileMapDict.Add("TILE_WALL_1110", 7);
+            tileMapDict.Add("TILE_WALL_0001", 8);
+            tileMapDict.Add("TILE_WALL_1001", 9);
+            tileMapDict.Add("TILE_WALL_0101", 10);
+            tileMapDict.Add("TILE_WALL_1101", 11);
+            tileMapDict.Add("TILE_WALL_0011", 12);
+            tileMapDict.Add("TILE_WALL_1011", 13);
+            tileMapDict.Add("TILE_WALL_0111", 14);
+            tileMapDict.Add("TILE_WALL_1111", TILE_MAIN_WALL);
+        
+        }
+
 
         private static void BuildMap()
         {
@@ -225,7 +275,7 @@ namespace MapGen
             {
                 Room newRoom = new Room();
                 newRoom.displayCharacter = ".";
-                newRoom.dataType = 2;
+                newRoom.dataType = TILE_MAIN_GROUND;
                 newRoom.width = r.Next(mapSqrRoomMinWidth, mapSqrRoomMaxWidth);
                 newRoom.height = r.Next(mapSqrRoomMinHeight, mapSqrRoomMaxHeight);
 
@@ -307,7 +357,7 @@ namespace MapGen
                 {
                     Room newRoom = new Room();
                     newRoom.displayCharacter = ".";
-                    newRoom.dataType = 2;
+                    newRoom.dataType = TILE_MAIN_GROUND;
 
                     if (roomCounter == 0)
                     {
@@ -406,7 +456,7 @@ namespace MapGen
             {
                 Room newRoom = new Room();
                 newRoom.displayCharacter = ".";
-                newRoom.dataType = 2;
+                newRoom.dataType = TILE_MAIN_GROUND;
                 newRoom.width = r.Next(mapSqrRoomMinWidth, mapSqrRoomMaxWidth);
                 newRoom.height = r.Next(mapSqrRoomMinHeight, mapSqrRoomMaxHeight);
 
@@ -478,7 +528,7 @@ namespace MapGen
                 }
 
                 //THIS NEEDS TO BE REFACTORED BIG TIME!!!!! There's lots of repeated code in here that can be written better...
-                //Just wanted to brute force it to make sure it would work.
+                //Just wanted to brute force it to make sure it would work. - this could be done the same wall rooms are being done with drawing squares s
                 if (room1X > room2X)
                 {
                     while (room1X > room2X)
@@ -499,7 +549,7 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[tunnelYPlace, room1X] = 2;
+                            mapData[tunnelYPlace, room1X] = TILE_MAIN_GROUND;
                             mapCollisionData[tunnelYPlace, room1X] = 0; 
                             mapDisplayData[tunnelYPlace, room1X] = "."; 
                         }
@@ -513,7 +563,7 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[tunnelYPlace, room1X] = 2;
+                            mapData[tunnelYPlace, room1X] = TILE_MAIN_GROUND;
                             mapCollisionData[tunnelYPlace, room1X] = 0;
                             mapDisplayData[tunnelYPlace, room1X] = ".";
                         }
@@ -543,7 +593,7 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[tunnelYPlace, room1X] = 2;
+                            mapData[tunnelYPlace, room1X] = TILE_MAIN_GROUND;
                             mapCollisionData[tunnelYPlace, room1X] = 0;
                             mapDisplayData[tunnelYPlace, room1X] = ".";
                         }
@@ -557,12 +607,12 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[tunnelYPlace, room1X] = 2;
+                            mapData[tunnelYPlace, room1X] = TILE_MAIN_GROUND;
                             mapCollisionData[tunnelYPlace, room1X] = 0;
                             mapDisplayData[tunnelYPlace, room1X] = ".";
                         }
 
-                        mapData[room1Y, room1X] = 2;
+                        mapData[room1Y, room1X] = TILE_MAIN_GROUND;
                         mapCollisionData[room1Y, room1X] = 0;
                         mapDisplayData[room1Y, room1X] = ".";
                         room1X++;
@@ -588,7 +638,7 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[room1Y, tunnelXPlace] = 2;
+                            mapData[room1Y, tunnelXPlace] = TILE_MAIN_GROUND;
                             mapCollisionData[room1Y, tunnelXPlace] = 0;
                             mapDisplayData[room1Y, tunnelXPlace] = ".";
                         }
@@ -602,12 +652,12 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[room1Y, tunnelXPlace] = 2;
+                            mapData[room1Y, tunnelXPlace] = TILE_MAIN_GROUND;
                             mapCollisionData[room1Y, tunnelXPlace] = 0;
                             mapDisplayData[room1Y, tunnelXPlace] = ".";
                         }
 
-                        mapData[room1Y, room1X] = 2;
+                        mapData[room1Y, room1X] = TILE_MAIN_GROUND;
                         mapCollisionData[room1Y, room1X] = 0;
                         mapDisplayData[room1Y, room1X] = ".";
                         room1Y--;
@@ -633,7 +683,7 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[room1Y, tunnelXPlace] = 2;
+                            mapData[room1Y, tunnelXPlace] = TILE_MAIN_GROUND;
                             mapCollisionData[room1Y, tunnelXPlace] = 0;
                             mapDisplayData[room1Y, tunnelXPlace] = ".";
                         }
@@ -647,12 +697,12 @@ namespace MapGen
                                 break;
                             }
 
-                            mapData[room1Y, tunnelXPlace] = 2;
+                            mapData[room1Y, tunnelXPlace] = TILE_MAIN_GROUND;
                             mapCollisionData[room1Y, tunnelXPlace] = 0;
                             mapDisplayData[room1Y, tunnelXPlace] = ".";
                         }
 
-                        mapData[room1Y, room1X] = 2;
+                        mapData[room1Y, room1X] = TILE_MAIN_GROUND;
                         mapCollisionData[room1Y, room1X] = 0;
                         mapDisplayData[room1Y, room1X] = ".";
                         room1Y++;
@@ -745,6 +795,84 @@ namespace MapGen
             }
         }
 
+
+        /**
+         * This function loops the map data and builds out the wall tile maps.
+         **/
+        private void RefineTileMap()
+        {
+            for(int y = 0; y < mapCollisionData.GetLength(0); y++)
+            {
+                for(int x = 0; x < mapCollisionData.GetLength(1); x++)
+                {
+                    string north = "0";
+                    string east = "0";
+                    string south = "0";
+                    string west = "0";
+                    string tileKey = "TILE_WALL_";
+
+                    if(mapCollisionData[y,x] == 1)
+                    {
+                        //Check north
+                        if(y - 1 >= 0)
+                        {
+                            if(mapCollisionData[y - 1, x] == 1)
+                            {
+                                north = "1";
+                            }
+                        }
+                        else
+                        {
+                            north = "1";
+                        }
+
+                        //Check east
+                        if (x + 1 <= mapCollisionData.GetLength(1) - 1)
+                        {
+                            if (mapCollisionData[y, x + 1] == 1)
+                            {
+                                east = "1";
+                            }
+                        }
+                        else
+                        {
+                            east = "1";
+                        }
+
+                        //Check south
+                        if (y + 1 <= mapCollisionData.GetLength(0) - 1)
+                        {
+                            if (mapCollisionData[y + 1, x] == 1)
+                            {
+                                south = "1";
+                            }
+                        }
+                        else
+                        {
+                            south = "1";
+                        }
+
+
+                        //Check west
+                        if (x - 1 >= 0)
+                        {
+                            if (mapCollisionData[y, x - 1] == 1)
+                            {
+                                west = "1";
+                            }
+                        }
+                        else
+                        {
+                            west = "1";
+                        }
+
+                        tileKey = tileKey + north + east + south + west;
+                        mapData[y, x] = tileMapDict[tileKey];
+                    }
+                }
+            }
+        }
+
         private void SetPlayerSpawn()
         {
             Random r = new Random();
@@ -755,7 +883,7 @@ namespace MapGen
         private void SetEnemySpawns()
         {
             Random r = new Random();
-            int numOfEnemies = 1;
+            int numOfEnemies = 0;
             int enemyCounter = 0;
 
             while(enemyCounter < numOfEnemies)

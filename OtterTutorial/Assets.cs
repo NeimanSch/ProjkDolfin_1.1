@@ -30,7 +30,7 @@ namespace OtterTutorial
 
         public const string ENEMY_SPRITE = "../../Assets/Graphics/enemy.png";
 
-        public const string TILESET = "../../Assets/Graphics/tileset.png";
+        public const string TILESET = "../../Assets/Graphics/tilesetv1.png";
         public const string MAP_WORLD = "../../Assets/Levels/tiles.csv";
         public const string MAP_SOLID = "../../Assets/Levels/solids.csv";
 

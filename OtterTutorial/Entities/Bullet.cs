@@ -50,6 +50,8 @@ namespace OtterTutorial.Entities
         public double pDist = 0;
         public string shooter;
 
+        public BulletData data;
+
         public Bullet(float x, float y)
         {
             // Set the Bullet's X,Y coordinates, and its direction
@@ -66,6 +68,7 @@ namespace OtterTutorial.Entities
             image = new Image(Assets.BULLET);
             Graphic = image;
 
+            data = new BulletData(0);
 
             // This line goes in our constructor
             shootSnd.Play();
@@ -111,6 +114,20 @@ namespace OtterTutorial.Entities
             }
         }
 
+        public Bullet(BulletData bulletDat, float x, float y, int dir, string shooter) : this (x, y, dir, shooter)
+        {
+            data = bulletDat;
+         
+            this.direction = dir;
+            this.X = x;
+            this.Y = y;
+
+            if(bulletDat.patternType == BulletData.BULLET_PAT_CIRCLE)
+            {
+                InitCircPattern();
+            }
+            
+        }
 
         /**
          * This method handles the offset of the bullet when shooting in a circular pattern.
@@ -228,7 +245,7 @@ namespace OtterTutorial.Entities
             }
         }
 
-        public void PlayerBulletMovement(ref GameScene scene)
+        public void StraightBulletMovement(ref GameScene scene)
         {
             float newX;
             float newY;
@@ -236,7 +253,12 @@ namespace OtterTutorial.Entities
             {
                 case Global.DIR_UP:
                     {
-                        Y -= bulletSpeed;
+                        //Y -= bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin( ((data.trajectoryAngle + 90) * Math.PI)/180));
+                        Y = (float)(Y - y1);
+                        double x1 = ((data.speed) * Math.Cos( ((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        X = (float)(this.X + x1);
+
                         //jb - udpated to make the bullets collide with solid map objectss
                         newY = Y + bulletSpeed;
                         if (scene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
@@ -248,7 +270,12 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_DOWN:
                     {
-                        Y += bulletSpeed;
+                        //Y += bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        Y = (float)(Y + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        X = (float)(this.X + x1);
+                        
                         //jb - udpated to make the bullets collide with solid map objectss
                         newY = Y - bulletSpeed;
                         if (scene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
@@ -260,7 +287,11 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_LEFT:
                     {
-                        X -= bulletSpeed;
+                        //X -= bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle + 180) * Math.PI) / 180));
+                        Y = (float)(Y + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle + 180) * Math.PI) / 180));
+                        X = (float)(this.X + x1);
 
                         //jb - udpated to make the bullets collide with solid map objectss
                         newX = X + bulletSpeed;
@@ -273,7 +304,12 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_RIGHT:
                     {
-                        X += bulletSpeed;
+                        //X += bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle) * Math.PI) / 180));
+                        Y = (float)(Y + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle) * Math.PI) / 180));
+                        X = (float)(this.X + x1);
+
                         //jb - udpated to make the bullets collide with solid map objectss
                         newX = X - bulletSpeed;
                         if (scene.grid.GetRect(newX, Y, newX + WIDTH, Y + HEIGHT, false))
@@ -302,7 +338,10 @@ namespace OtterTutorial.Entities
             {
                 case Global.DIR_UP:
                     {
-                        circCenterY -= bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        circCenterY = (float)(circCenterY - y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        circCenterX = (float)(this.circCenterX + x1);
 
                         Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
                         X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
@@ -318,7 +357,11 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_DOWN:
                     {
-                        circCenterY += bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        circCenterY = (float)(circCenterY + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle + 90) * Math.PI) / 180));
+                        circCenterX = (float)(this.circCenterX + x1);
+
                         
                         Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
                         X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
@@ -334,7 +377,11 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_LEFT:
                     {
-                        circCenterX -= bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle + 180) * Math.PI) / 180));
+                        circCenterY = (float)(circCenterY + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle + 180) * Math.PI) / 180));
+                        circCenterX = (float)(this.circCenterX + x1);
+
                         Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
                         X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
 
@@ -349,7 +396,11 @@ namespace OtterTutorial.Entities
                     }
                 case Global.DIR_RIGHT:
                     {
-                        circCenterX += bulletSpeed;
+                        double y1 = ((data.speed) * Math.Sin(((data.trajectoryAngle) * Math.PI) / 180));
+                        circCenterY = (float)(circCenterY + y1);
+                        double x1 = ((data.speed) * Math.Cos(((data.trajectoryAngle) * Math.PI) / 180));
+                        circCenterX = (float)(this.circCenterX + x1);
+
                         Y = (float)(circCenterY + circRadius * Math.Cos(circAngle));
                         X = (float)(circCenterX + circRadius * Math.Sin(circAngle));
 
@@ -389,18 +440,46 @@ namespace OtterTutorial.Entities
             }
             else
             {
-                CircularMovement(ref checkScene);
+
+                if(data.patternType == BulletData.BULLET_PAT_CIRCLE)
+                {
+                    CircularMovement(ref checkScene);
+                }
+                else if(data.patternType == BulletData.BULLET_PAT_STRAIGHT)
+                {
+                    StraightBulletMovement(ref checkScene);
+                }
+                else
+                {
+                    //Move this to the constructor and rather than calling a particular movement function,
+                    //change the bullet pattern type
+
+                    //int shotPicker = Global.rand.Next(0, 50);
+
+                    //if(shotPicker <= 25)
+                    //{
+                    //    CircularMovement(ref checkScene);
+                    //}
+                    //else
+                    //{
+                    //    StraightBulletMovement(ref checkScene);
+                    //}
+                }
+
+                
                 //PlayerBulletMovement(ref checkScene);
             }
+
             if (distanceTraveled % 60 == 0)
             {
-                Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
+               // Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
             }
 
             // If we have traveled the max distance or more, then
             // the bullet will remove itself from the current Scene
             distanceTraveled += bulletSpeed;
-            if (distanceTraveled >= maxDistance)
+            
+            if (distanceTraveled >= data.range)
             {
                 //Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
                 RemoveSelf();
