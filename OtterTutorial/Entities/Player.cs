@@ -31,28 +31,45 @@ namespace OtterTutorial.Entities
             X = x;
             Y = y;
             // Create a new spritemap, with the player.png image as our source, 32 pixels wide, and 40 pixels tall
-            sprite = new Spritemap<string>(Assets.PLAYER2, 32, 40);
+            sprite = new Spritemap<string>(Assets.PLAYER2, 32, 43);
 
-            sprite.Add("standLeft", new int[] { 4 }, new float[] { 5f });
-            sprite.Add("standRight", new int[] { 8 }, new float[] { 5f });
-            sprite.Add("standDown", new int[] { 0 }, new float[] { 5f });
-            sprite.Add("standUp", new int[] { 12 }, new float[] { 5f  });
-            sprite.Add("walkLeft", new int[] { 4, 5, 6, 7 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("walkRight", new int[] { 8, 9, 10, 11 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("walkDown", new int[] { 0, 1, 2, 3 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("walkUp", new int[] { 12, 13, 14, 15 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("standLeft", new int[] { 0 }, new float[] { 5f });
+            sprite.Add("standRight", new int[] { 0 }, new float[] { 5f });
+            sprite.Add("standDown", new int[] { 4 }, new float[] { 5f });
+            sprite.Add("standUp", new int[] { 0 }, new float[] { 5f  });
+            sprite.Add("walkLeft", new int[] { 0,1,2,3 }, new float[] { 5f, 5f, 5f, 5f});
+            sprite.Add("walkRight", new int[] { 0, 1, 2, 3 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("walkDown", new int[] { 4,5,6,7 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("walkUp", new int[] { 0, 1, 2, 3 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("shootLeft", new int[] { 2,3 }, new float[] {5f,5f});
 
             // Tell the spritemap which animation to play when the scene starts
-            
+
 
             // Lastly, we must set our Entity's graphic, otherwise it will not display
             Graphic = sprite;
+
+            //Graphic.CenterOrigin();
+            Graphic.OriginY = 16;
+            Graphic.OriginX = 8;
+
+
+            sprite.Play("standDown");
+            sprite.Scale = 2f;
+
+            SetHitbox(20, 20, (int)Global.Type.PLAYER);
 
             equippedWeapon = new Weapon();
 
             sprite.Play("standDown");
 
-            SetHitbox(WIDTH, HEIGHT, (int)Global.Type.PLAYER);
+           // SetHitbox(WIDTH, HEIGHT, (int)Global.Type.PLAYER);
+        }
+
+        public override void Render()
+        {
+            Hitbox.Render();
+            base.Render();
         }
 
         public override void Update()
@@ -80,7 +97,7 @@ namespace OtterTutorial.Entities
 
                 direction = Global.DIR_LEFT;
                 sprite.Play("walkLeft");
-                sprite.FlippedX = false;
+                sprite.FlippedX = true;
             }
             else if (Global.PlayerSession.Controller.Right.Down)
             {
@@ -218,7 +235,19 @@ namespace OtterTutorial.Entities
                 Item i = (Item)colli.Entity;
                 if (i.attributes.ContainsKey("movementSpeed"))
                 {
-                    moveSpeed = moveSpeed * (int)i.attributes["movementSpeed"];
+                    moveSpeed = moveSpeed + (int)i.attributes["movementSpeed"];
+                }
+                
+                if (i.attributes.ContainsKey("fireRate"))
+                {
+                    equippedWeapon.bulletSpeed = equippedWeapon.bulletSpeed + (int)i.attributes["fireRate"];
+                    
+                }
+
+                if (i.attributes.ContainsKey("fireRange"))
+                {
+                    equippedWeapon.bulletRange = equippedWeapon.bulletRange + (int)i.attributes["fireRange"];
+
                 }
                 i.RemoveSelf();
             }

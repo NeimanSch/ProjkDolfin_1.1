@@ -52,17 +52,18 @@ namespace OtterTutorial.Entities
 
             // Set up the Spritemap in the same manner we did for the player
             sprite = new Spritemap<string>(Assets.ENEMY_SPRITE, 32, 40);
-            sprite.Add("standLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("standRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("standDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
-            sprite.Add("standUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
-            sprite.Add("walkLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("walkRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("walkDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
-            sprite.Add("walkUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
+            sprite.Add("standLeft", new int[] { 6 }, new float[] { 10f, 10f });
+            sprite.Add("standRight", new int[] { 6 }, new float[] { 10f, 10f });
+            sprite.Add("standDown", new int[] { 0 }, new float[] { 10f, 10f });
+            sprite.Add("standUp", new int[] { 3 }, new float[] { 10f, 10f });
+            sprite.Add("walkLeft", new int[] { 6, 7, 8 }, new float[] { 15f });
+            sprite.Add("walkRight", new int[] { 6,7,8 }, new float[] { 15f });
+            sprite.Add("walkDown", new int[] { 0,1,2 }, new float[] { 15f });
+            sprite.Add("walkUp", new int[] { 3,4,5 }, new float[] { 15f });
             sprite.Play("standLeft");
 
             Graphic = sprite;
+            Graphic.Scale = 1.5f;
 
             // Set our Enemy hitbox to be 32 x 40. This goes in our Enemy class
             SetHitbox(32, 40, (int)Global.Type.ENEMY);
@@ -115,7 +116,8 @@ namespace OtterTutorial.Entities
                 }
             }
             // If going left, flip the spritesheet
-            sprite.FlippedX = direction;
+            //sprite.FlippedX = direction;
+            //sprite.Play("walkLeft");
             Move();
             if ((enemyFireCounter % 100) == 0)
             {
@@ -139,6 +141,8 @@ namespace OtterTutorial.Entities
                         if (xDiff < 0)
                         {
                             newPOS = X - speed;
+                            sprite.Play("walkLeft");
+                            sprite.FlippedX = false;
                             if (!CheckGridCollisions(checkScene, newPOS, true))
                             {
                                 X -= speed;
@@ -147,14 +151,21 @@ namespace OtterTutorial.Entities
                         else
                         {
                             newPOS = X + speed;
+                            sprite.Play("walkRight");
+                            sprite.FlippedX = true;
                             if (!CheckGridCollisions(checkScene, newPOS, true))
                             {
                                 X += speed;
                             }
-                        }
+                        }//xdiff
+
                         if (yDiff < 0)
                         {
                             newPOS = Y - speed;
+                            if (Math.Abs(yDiff) > Math.Abs(xDiff))
+                            {
+                                sprite.Play("walkUp");
+                            }
                             if (!CheckGridCollisions(checkScene, newPOS, false))
                             {
                                 Y -= speed;
@@ -163,11 +174,16 @@ namespace OtterTutorial.Entities
                         else
                         {
                             newPOS = Y + speed;
+                            if (Math.Abs(yDiff) > Math.Abs(xDiff))
+                            {
+                                sprite.Play("walkDown");
+                            }
                             if (!CheckGridCollisions(checkScene, newPOS, false))
                             {
                                 Y += speed;
                             }
-                        }
+                        } //yDiff
+
                     }
                     break;
                 case "2":

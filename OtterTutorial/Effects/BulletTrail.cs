@@ -15,6 +15,7 @@ namespace OtterTutorial.Effects
             sprite.Add("Emit", new int[] { 0, 1, 2, 3 }, new float[] { 10f, 10f, 10f, 10f });
             sprite.Play("Emit");
             Graphic = sprite;
+            Graphic.Scale = .5f;
         }
     }
 }

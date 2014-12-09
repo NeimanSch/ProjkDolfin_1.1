@@ -15,8 +15,8 @@ namespace OtterTutorial
         public const string MUSIC_TITLE = "../../Assets/Music/menu.ogg";
         public const string MUSIC_GAME = "../../Assets/Music/game.ogg";
 
-        public const string PLAYER = "../../Assets/Graphics/player.png";
-        public const string PLAYER2 = "../../Assets/Graphics/player2.png";
+        public const string PLAYER = "../../Assets/Graphics/player4.png";
+        public const string PLAYER2 = "../../Assets/Graphics/gun-test.png";
         public const string PLAYER_EXPLOSION = "../../Assets/Graphics/explosion.png";
         public const string PLAYER_PARTICLE = "../../Assets/Graphics/particle.png";
         public const string BULLET = "../../Assets/Graphics/bullet.png";
@@ -30,7 +30,7 @@ namespace OtterTutorial
 
         public const string ENEMY_SPRITE = "../../Assets/Graphics/enemy.png";
 
-        public const string TILESET = "../../Assets/Graphics/tileset.png";
+        public const string TILESET = "../../Assets/Graphics/tileset3.png";
         public const string MAP_WORLD = "../../Assets/Levels/tiles.csv";
         public const string MAP_SOLID = "../../Assets/Levels/solids.csv";
 
@@ -43,7 +43,8 @@ namespace OtterTutorial
         public const string MUSIC_END = "../../Assets/Music/end.ogg";
 
         public const string ITEM = "../../Assets/Graphics/item.png";
-        public const string ITEM2 = "../../Assets/Graphics/item2.png";
+        public const string PEZ  = "../../Assets/Graphics/pez.png";
 
+        public const string ITEMS = "../../Assets/Data/Items/items.xml";
     }
 }

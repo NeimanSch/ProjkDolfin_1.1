@@ -1,0 +1,47 @@
+<items>
+	<item>
+		<id>0</id>
+		<name>speed up</name>
+		<droprate_min>25</droprate_min>
+		<droprate_max>50</droprate_max>
+		<sprites>
+			<sprite>pez.png</sprite>
+			<height>32</height>
+			<width>32</width>
+		</sprites>
+		<attributes>
+			<name>movementSpeed</name>
+			<value>2</value>
+		</attributes>
+	</item>
+	<item>
+		<id>1</id>
+		<name>fire up</name>
+		<droprate_min>0</droprate_min>
+		<droprate_max>25</droprate_max>
+		<sprites>
+			<sprite>pez_blue.png</sprite>
+			<height>32</height>
+			<width>32</width>
+		</sprites>
+		<attributes>
+			<name>fireRate</name>
+			<value>1</value>
+		</attributes>
+	</item>
+	<item>
+		<id>2</id>
+		<name>range up</name>
+		<droprate_min>51</droprate_min>
+		<droprate_max>76</droprate_max>
+		<sprites>
+			<sprite>pez_yellow.png</sprite>
+			<height>32</height>
+			<width>32</width>
+		</sprites>
+		<attributes>
+			<name>fireRange</name>
+			<value>1</value>
+		</attributes>
+	</item>
+</items>

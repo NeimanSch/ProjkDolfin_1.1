@@ -71,7 +71,7 @@ namespace OtterTutorial.Entities
             shootSnd.Play();
 
             // Add a BulletTrail particle as soon as the Bullet enters the Scene
-            Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
+            //Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
 
             // Add this line to the Bullet.cs class
             // Set the Bullet hitbox to 16x14
@@ -392,7 +392,7 @@ namespace OtterTutorial.Entities
                 CircularMovement(ref checkScene);
                 //PlayerBulletMovement(ref checkScene);
             }
-            if (distanceTraveled % 60 == 0)
+            if (distanceTraveled % 120 == 0)
             {
                 Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
             }

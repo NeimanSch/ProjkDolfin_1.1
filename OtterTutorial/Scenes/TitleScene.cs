@@ -13,8 +13,8 @@ namespace OtterTutorial.Scenes
         // Create a new Image object, referencing the Otter image in our Assets folder
         public Image titleImage = new Image(Assets.TITLE_IMG);
 
-        public Text titleText = new Text("Otter Tutorial", Assets.FONT_PANIC, 84);
-        public Text enterText = new Text("Press Enter", Assets.FONT_PANIC, 40);
+        public Text titleText = new Text("Stellar Destiny",  84);
+        public Text enterText = new Text("Press Enter", 40);
 
         public const float TIMER_BLINK = 25f;
         public float blinkTimer = 0;
@@ -28,15 +28,17 @@ namespace OtterTutorial.Scenes
         public TitleScene()
         {
             // Center the title picture 
-            titleImage.CenterOrigin();
+            titleImage.CenterOriginZero();
             titleImage.X = Global.TUTORIAL.HalfWidth;
-            titleImage.Y = 1000; // When tweening something in, make sure it is actually off the screen first
+            titleImage.Y = Global.TUTORIAL.HalfHeight; // When tweening something in, make sure it is actually off the screen first
+            titleImage.ScaledWidth = Global.TUTORIAL.Width;
+            titleImage.ScaledHeight = Global.TUTORIAL.Height;
             this.AddGraphic(titleImage);
 
             // Otter utilizes the C# Tweening library called Glide
             // More info can be found here: http://www.reddit.com/r/gamedev/comments/1fabdh/
             // Below, we tween the titleImage to its new Y position, in .30 seconds. Our Easing function utilized is Ease.BackOut
-            Glide.GlideManagerImpl.Tweener.Tween(titleImage, new { Y = 250 }, 30f, 0f).Ease(Ease.BackOut);
+            Glide.GlideManagerImpl.Tweener.Tween(titleImage, new { Y = 350 }, 30f, 0f).Ease(Ease.BackOut);
 
             // Set the text's outline color to the 
             // hex color #7FA8D2 (Otter2d.com Blue)
