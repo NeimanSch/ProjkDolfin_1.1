@@ -19,6 +19,8 @@ namespace OtterTutorial.Entities
         public Spritemap<string> sprite;
 
         public int direction = 0;
+        public int health = 10;
+        public int score = 0;
 
         public bool dead = false;
 
