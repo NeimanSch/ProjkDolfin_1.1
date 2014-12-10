@@ -143,7 +143,7 @@ namespace OtterTutorial.Entities
             GameScene checkScene = (GameScene)Scene;
             switch (type)
             {
-                case 1:
+                case 0:
                     if (pDist > 200)
                     {
                         follow(newPOS, checkScene);
@@ -154,12 +154,7 @@ namespace OtterTutorial.Entities
                         shoot = true;
                     }
                     break;
-                case 2:
-                    //shoot = true;
-                    distance++;
-                    sineWave(newPOS, checkScene);
-                    break;
-                case 3:
+                case 1:
                     distance++;
                         if (distance >= 100)
                         {
@@ -193,6 +188,11 @@ namespace OtterTutorial.Entities
                             }
                             break;
                     }
+                    break;
+                case 2:
+                    //shoot = true;
+                    distance++;
+                    sineWave(newPOS, checkScene);
                     break;
             }
         }

@@ -108,9 +108,13 @@ namespace OtterTutorial.Scenes
             // This is rather crude, as we re-add the Enemy every time we switch screens
             // A good task beyond these tutorials would be ensuring that non-player
             // Entities retain their state upon switching screens
-            int i = 3;
+            int i = 0;
             foreach (Tuple<float, float> enemyLoc in planetMap.mapEnemySpawnLocations)
             {
+                if (i > 2)
+                {
+                    i = 0;
+                }
                 if ((Global.player.X >= enemyLoc.Item1) && (enemyLoc.Item1 < Global.player.X + 32))
                 {
 
@@ -120,12 +124,12 @@ namespace OtterTutorial.Scenes
                 {
                     Add(new Enemy(enemyLoc.Item1, enemyLoc.Item2, i));
                 }
-                //i += 1;
+                i += 1;
             }
             
             scoreText = new Text("Score: " + Global.player.score.ToString(), Assets.FONT_PANIC, 24);
-            scoreText.OutlineColor = new Otter.Color("7FA8D2");
-            scoreText.OutlineThickness = 3; 
+            //scoreText.OutlineColor = new Otter.Color("7FA8D2");
+            //scoreText.OutlineThickness = 3; 
             scoreText.CenterOrigin();
             scoreText.X = Global.player.X;
             scoreText.Y = Global.player.Y;
