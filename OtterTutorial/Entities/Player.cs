@@ -33,7 +33,7 @@ namespace OtterTutorial.Entities
             X = x;
             Y = y;
             // Create a new spritemap, with the player.png image as our source, 32 pixels wide, and 40 pixels tall
-            sprite = new Spritemap<string>(Assets.PLAYER2, 32, 43);
+            sprite = new Spritemap<string>(Assets.PLAYER2, 22, 29);
 
             sprite.Add("standLeft", new int[] { 0 }, new float[] { 5f });
             sprite.Add("standRight", new int[] { 0 }, new float[] { 5f });
