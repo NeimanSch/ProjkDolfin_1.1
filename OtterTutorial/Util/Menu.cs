@@ -37,14 +37,6 @@ namespace OtterTutorial.Util
 
         public void Update()
         {
-            if (Global.paused)
-            {
-                Scenes.GameScene.Instance.RemoveGraphic(container);
-                foreach (Text item in items)
-                {
-                    Scenes.GameScene.Instance.RemoveGraphic(item);
-                }
-            }
             if (items.Length == 2)
             {
                 container.X = Global.player.X + (GameScene.HALF_SCRENE_X - container.Width);
@@ -61,9 +53,13 @@ namespace OtterTutorial.Util
                 container.X = Global.player.X - container.HalfWidth;
                 container.Y = Global.player.Y - (2 * container.Height);
                 items[0].X = Global.player.X;
-                items[0].Y = Global.player.Y - (float)(1.5 * container.Height);
-
+                items[0].Y = Global.player.Y - (float)(1.6 * container.Height);
             }
+        }
+
+        public void remove()
+        {
+            Scenes.GameScene.Instance.RemoveGraphic(container);
         }
     }
 }

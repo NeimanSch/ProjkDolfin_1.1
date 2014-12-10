@@ -29,6 +29,7 @@ namespace OtterTutorial // This can be anything you choose, I opted for my proje
             Global.PlayerSession.Controller.Y.AddKey(Key.Up);
             Global.PlayerSession.Controller.R1.AddKey(Key.Space);
             Global.PlayerSession.Controller.L1.AddKey(Key.Z);
+            Global.PlayerSession.Controller.Select.AddKey(Key.P);
 
             Global.TUTORIAL.FirstScene = new TitleScene();
             Global.TUTORIAL.Start();

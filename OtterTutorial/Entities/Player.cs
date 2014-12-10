@@ -77,6 +77,11 @@ namespace OtterTutorial.Entities
         {
             base.Update();
 
+            if (Global.paused)
+            {
+                return;
+            }
+
             // Used to determine which directions we are moving in
             bool horizontalMovement = true;
             bool verticalMovement = true;

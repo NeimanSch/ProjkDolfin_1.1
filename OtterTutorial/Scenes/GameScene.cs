@@ -191,18 +191,13 @@ namespace OtterTutorial.Scenes
                 else
                 {
                     Global.paused = false;
-                    this.RemoveGraphic(pauseMenu.container);
-                    foreach (Text item in pauseMenu.items)
-                    {
-                        this.RemoveGraphic(item);
-                    }
                 }
                 return;
             }
             if (Global.paused)
             {
-                DrawPauseMenu();
-
+                //DrawPauseMenu();
+                //pauseMenu.Update();
                 return;
             }
             else
@@ -212,10 +207,6 @@ namespace OtterTutorial.Scenes
             this.CameraX = Global.player.X - HALF_SCRENE_X;
             this.CameraY = Global.player.Y - HALF_SCRENE_Y;
             playerStats.Update();
-            if (Global.paused)
-            {
-                pauseMenu.Update();
-            }
         }
 
         // Scroll method that moves the CameraX, CameraY
