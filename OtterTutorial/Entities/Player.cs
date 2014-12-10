@@ -9,8 +9,8 @@ namespace OtterTutorial.Entities
 {
     public class Player : Entity
     {
-        public const int WIDTH = 32;
-        public const int HEIGHT = 40;
+        public const int WIDTH = 22;
+        public const int HEIGHT = 29;
         public const float DIAGONAL_SPEED = 1.4f;
 
         public float moveSpeed = 4.0f;
@@ -33,7 +33,7 @@ namespace OtterTutorial.Entities
             X = x;
             Y = y;
             // Create a new spritemap, with the player.png image as our source, 32 pixels wide, and 40 pixels tall
-            sprite = new Spritemap<string>(Assets.PLAYER2, 22, 29);
+            sprite = new Spritemap<string>(Assets.PLAYER2, WIDTH, HEIGHT);
 
             sprite.Add("standLeft", new int[] { 0 }, new float[] { 5f });
             sprite.Add("standRight", new int[] { 0 }, new float[] { 5f });
@@ -168,47 +168,12 @@ namespace OtterTutorial.Entities
                     sprite.Play("standUp");
                 }
             }
-
-            
             // CHECK FOR WEAPON SHOOTAN
             equippedWeapon.fire();
 
             // Add particles if the player is moving in any direction
             if (verticalMovement || horizontalMovement)
             {
-                /*
-                // Add walking particles
-                float particleXBuffer = 0;
-                float particleYBuffer = 0;
-                switch (direction)
-                {
-                    case Global.DIR_UP:
-                        {
-                            particleXBuffer = Otter.Rand.Float(8, 24);
-                            particleYBuffer = Otter.Rand.Float(0, 5);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + particleXBuffer, Y + 40));
-                            break;
-                        }
-                    case Global.DIR_DOWN:
-                        {
-                            particleXBuffer = Otter.Rand.Float(8, 24);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + particleXBuffer, Y));
-                            break;
-                        }
-                    case Global.DIR_LEFT:
-                        {
-                            particleYBuffer = Otter.Rand.Float(-2, 2);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + 32 - 3, Y + 40 + particleYBuffer));
-                            break;
-                        }
-                    case Global.DIR_RIGHT:
-                        {
-                            particleYBuffer = Otter.Rand.Float(-2, 2);
-                            Global.TUTORIAL.Scene.Add(new WalkParticle(X + 3, Y + 40 + particleYBuffer));
-                            break;
-                        }
-                }
-                */
                 if (verticalMovement && horizontalMovement)
                 {
                     X += xSpeed / DIAGONAL_SPEED;

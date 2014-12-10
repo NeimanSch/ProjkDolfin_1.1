@@ -130,13 +130,13 @@ namespace OtterTutorial.Scenes
             scoreText.X = Global.player.X;
             scoreText.Y = Global.player.Y;
             healthText = new Text("Health: " + Global.player.health.ToString(), Assets.FONT_PANIC, 24);
-            healthText.OutlineColor = new Otter.Color("d2807f");
-            healthText.OutlineThickness = 3;
+            //healthText.OutlineColor = new Otter.Color("d2807f");
+            //healthText.OutlineThickness = 3;
             healthText.CenterOrigin();
             healthText.X = Global.player.X;
             healthText.Y = Global.player.Y;
-            playerStats = new Menu(Global.player.X, Global.player.Y, 20, Color.Cyan, healthText, scoreText);
-            playerStats.container.OutlineColor = Color.Cyan;
+            playerStats = new Menu(Global.player.X, Global.player.Y, 20, Color.Grey, healthText, scoreText);
+            playerStats.container.OutlineColor = Color.Gray;
             playerStats.container.OutlineThickness = 2f;
             playerStats.container.Alpha = 0.3f;
             pauseText = new Text("Game Paused", Assets.FONT_PANIC, 24);
