@@ -16,6 +16,8 @@ namespace OtterTutorial.Entities
         public int bulletCount;
         public int tier;
         public int level;
+        public float bulletSpeed;
+        public float bulletRange;
         public Bullet bullet;
         public List<BulletData> clip;
 
