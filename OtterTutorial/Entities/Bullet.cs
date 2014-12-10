@@ -49,13 +49,14 @@ namespace OtterTutorial.Entities
         public float yDiff = 0;
         public double pDist = 0;
         public string shooter;
+        public Vector2 shootPt;
 
         public BulletData data;
 
         public Bullet(float x, float y)
         {
             // Set the Bullet's X,Y coordinates, and its direction
-            X = x;
+            X = x + 20;
             Y = y;
 
             circCenterX = X;
@@ -79,7 +80,7 @@ namespace OtterTutorial.Entities
             // Add this line to the Bullet.cs class
             // Set the Bullet hitbox to 16x14
             SetHitbox(16, 14, (int)Global.Type.BULLET);
-
+            shootPt = new Vector2(Global.player.X, Global.player.Y);
         }
 
         public Bullet(float x, float y, int dir)
@@ -119,8 +120,30 @@ namespace OtterTutorial.Entities
             data = bulletDat;
          
             this.direction = dir;
-            this.X = x;
-            this.Y = y;
+            if (direction == Global.DIR_RIGHT)
+            {
+                this.X = x + Global.player.Hitbox.Width;
+            }
+            else if (direction == Global.DIR_LEFT)
+            {
+                this.X = x - Global.player.Hitbox.Width;
+            }
+            else
+            {
+                this.X = x;
+            }
+            if (direction == Global.DIR_UP)
+            {
+                this.Y = y - Global.player.Hitbox.Width;
+            }
+            else if (direction == Global.DIR_DOWN)
+            {
+                this.Y = y + Global.player.Hitbox.Width;
+            }
+            else
+            {
+                this.Y = y;
+            }
 
             if(bulletDat.patternType == BulletData.BULLET_PAT_CIRCLE)
             {
@@ -180,10 +203,10 @@ namespace OtterTutorial.Entities
             return collision;
         }
 
-        public void EnemyBulletMovement(ref GameScene scene)
+        public void EnemyBulletMovement(ref GameScene scene, Vector2 vec)
         {
-            xDiff = Global.player.X - X;
-            yDiff = Global.player.Y - Y;
+            xDiff = vec.X - X;
+            yDiff = vec.Y - Y;
             pDist = Math.Sqrt(Math.Pow(xDiff, 2) + Math.Pow(yDiff, 2));
             float newPOS = 0;
             if (xDiff < 0)
@@ -242,6 +265,14 @@ namespace OtterTutorial.Entities
             {
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
                 RemoveSelf();
+            }
+            var collp = Collider.Collide(X, Y, (int)Global.Type.PLAYER);
+            if (collp != null)
+            {
+                Player p = (Player)collp.Entity;
+                //p.TakeDamage(1);
+                this.RemoveSelf();
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
             }
         }
 
@@ -436,16 +467,23 @@ namespace OtterTutorial.Entities
 
             if (shooter == "enemy")
             {
-                EnemyBulletMovement(ref checkScene);
+                if (true)
+                {
+                    EnemyBulletMovement(ref checkScene, shootPt);
+                }
+                else
+                {
+                    EnemyBulletMovement(ref checkScene, new Vector2(Global.player.X, Global.player.Y));
+                }
             }
             else
             {
 
-                if(data.patternType == BulletData.BULLET_PAT_CIRCLE)
+                if (data.patternType == BulletData.BULLET_PAT_CIRCLE)
                 {
-                CircularMovement(ref checkScene);
+                    CircularMovement(ref checkScene);
                 }
-                else if(data.patternType == BulletData.BULLET_PAT_STRAIGHT)
+                else if (data.patternType == BulletData.BULLET_PAT_STRAIGHT)
                 {
                     StraightBulletMovement(ref checkScene);
                 }
@@ -466,19 +504,19 @@ namespace OtterTutorial.Entities
                     //}
                 }
 
-                
+
                 //PlayerBulletMovement(ref checkScene);
             }
 
             if (distanceTraveled % 60 == 0)
             {
-               // Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
+                // Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));
             }
 
             // If we have traveled the max distance or more, then
             // the bullet will remove itself from the current Scene
             distanceTraveled += bulletSpeed;
-            
+
             if (distanceTraveled >= data.range)
             {
                 //Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));

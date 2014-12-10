@@ -64,7 +64,7 @@ namespace OtterTutorial.Scenes
 
             //GENERATE THAT MAP!
             planetMap = new Map();
-            planetMap.GenerateMap(100, 100, 1, 55, 100, 55, 100, 0, 4, 8, 3, 3, 1);
+            planetMap.GenerateMap(100, 100, 10, 5, 20, 5, 15, 0, 4, 16, 3, 3, 1);
 
             //Set the player's landing/spawning coordinates
             Global.player.X = planetMap.mapPlayerSpawnLocation.Item1;
@@ -74,7 +74,7 @@ namespace OtterTutorial.Scenes
             // Since we are constantly switching Scenes we need to do some checking,
             // ensuring that the music doesn't get restarted.
             // We should probably add an isPlaying boolean to the Music class. I will do this soon.
-            if (Global.gameMusic == null)
+            if (false)
             {
                 Global.gameMusic = new Music(Assets.MUSIC_GAME);
                 Global.gameMusic.Play();

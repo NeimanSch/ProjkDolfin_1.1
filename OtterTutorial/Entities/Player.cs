@@ -55,7 +55,6 @@ namespace OtterTutorial.Entities
             Graphic.OriginY = 16;
             Graphic.OriginX = 8;
 
-
             sprite.Play("standDown");
             sprite.Scale = 2f;
 
