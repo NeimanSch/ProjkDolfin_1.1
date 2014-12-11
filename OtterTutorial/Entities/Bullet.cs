@@ -15,6 +15,8 @@ namespace OtterTutorial.Entities
 
         // Default bullet speed
         public float bulletSpeed = 10.0f;
+        public float enemyBulletSpeed = 1.0f;
+        
 
         // Direction the bullet is going to travel in
         public int direction = 0;
@@ -47,9 +49,11 @@ namespace OtterTutorial.Entities
 
         public float xDiff = 0;
         public float yDiff = 0;
+        public float b;
         public double pDist = 0;
         public string shooter;
         public Vector2 shootPt;
+        public double theta;
 
         public BulletData data;
 
@@ -93,6 +97,13 @@ namespace OtterTutorial.Entities
             : this(x, y)
         {
             shooter = s;
+            if (shooter == "enemy")
+            {
+                //theta = Math.Atan((double)((Global.player.Y - Y) / (Global.player.X - X)));
+                theta = (Global.player.Y - Y) / (Global.player.X - X);
+                b = Y - (X * ((Global.player.Y - Y) / (Global.player.X - X)));
+                xDiff = Global.player.X - X;
+            }
         }
 
         public Bullet(float x, float y, int dir, string s)
@@ -205,62 +216,15 @@ namespace OtterTutorial.Entities
 
         public void EnemyBulletMovement(ref GameScene scene, Vector2 vec)
         {
-            xDiff = vec.X - X;
-            yDiff = vec.Y - Y;
-            pDist = Math.Sqrt(Math.Pow(xDiff, 2) + Math.Pow(yDiff, 2));
-            float newPOS = 0;
-            if (xDiff < 0)
+            if (xDiff > 0)
             {
-                newPOS = X - bulletSpeed;
-                if (!CheckGridCollisions(scene, newPOS, true))
-                {
-                    X -= bulletSpeed;
-                }
-                else
-                {
-                    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
-                    RemoveSelf();
-                }
+                X += enemyBulletSpeed;
             }
             else
             {
-                newPOS = X + bulletSpeed;
-                if (!CheckGridCollisions(scene, newPOS, true))
-                {
-                    X += bulletSpeed;
-                }
-                else
-                {
-                    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
-                    RemoveSelf();
-                }
+                X -= enemyBulletSpeed;
             }
-            if (yDiff < 0)
-            {
-                newPOS = Y - bulletSpeed;
-                if (!CheckGridCollisions(scene, newPOS, false))
-                {
-                    Y -= bulletSpeed;
-                }
-                else
-                {
-                    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
-                    RemoveSelf();
-                }
-            }
-            else
-            {
-                newPOS = Y + bulletSpeed;
-                if (!CheckGridCollisions(scene, newPOS, false))
-                {
-                    Y += bulletSpeed;
-                }
-                else
-                {
-                    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
-                    RemoveSelf();
-                }
-            }
+            Y = (float)theta * X + b;
             if (X == Global.player.X && Y == Global.player.Y)
             {
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
@@ -517,7 +481,7 @@ namespace OtterTutorial.Entities
             // the bullet will remove itself from the current Scene
             distanceTraveled += bulletSpeed;
 
-            if (distanceTraveled >= data.range)
+            if (distanceTraveled >= data.range && shooter == "player")
             {
                 //Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
                 RemoveSelf();

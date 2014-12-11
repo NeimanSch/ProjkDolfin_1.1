@@ -45,6 +45,7 @@ namespace OtterTutorial.Entities
         public string state;
         public float distance = 0;
         public double circRotationSpeed = 0.2;
+        public float bulletSpeed = 1.0f;
         public double circAngle = 0.0;
 
         public Enemy(float x, float y)
