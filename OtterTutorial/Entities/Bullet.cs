@@ -229,12 +229,12 @@ namespace OtterTutorial.Entities
             Y = (float)slope * X + b;
             if (scene.grid.GetRect(X, Y, X + WIDTH, Y + HEIGHT, false))
             {
-                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
                 RemoveSelf();
             }
             if (X == Global.player.X && Y == Global.player.Y)
             {
-                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
                 RemoveSelf();
             }
             var collp = Collider.Collide(X, Y, (int)Global.Type.PLAYER);
@@ -243,7 +243,7 @@ namespace OtterTutorial.Entities
                 Player p = (Player)collp.Entity;
                 //p.TakeDamage(1);
                 this.RemoveSelf();
-                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
             }
         }
 

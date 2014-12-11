@@ -32,5 +32,17 @@ namespace OtterTutorial.Effects
             // Shake the camera each time we explode
             Global.camShaker.ShakeCamera();
         }
+
+        public BulletExplosion(float x, float y, int i)
+            : this(x, y)
+        {
+            if (i == 1)
+            {
+                sprite = new Spritemap<string>(Assets.ENEMY_BULLET_EXPLOSION, 32, 40);
+                sprite.Add("Emit", new int[] { 0, 1, 2, 3 }, new float[] { 10f, 10f, 10f, 10f });
+                sprite.Play("Emit");
+                Graphic = sprite;
+            }
+        }
     }
 }

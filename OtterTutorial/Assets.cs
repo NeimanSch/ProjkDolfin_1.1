@@ -27,6 +27,7 @@ namespace OtterTutorial
         public const string SND_ENEMY_HURT = "../../Assets/Sound/enemyHurt.ogg";
 
         public const string BULLET_EXPLOSION = "../../Assets/Graphics/explosion.png";
+        public const string ENEMY_BULLET_EXPLOSION = "../../Assets/Graphics/enemy-explosion.png";
         public const string BULLET_PARTICLE = "../../Assets/Graphics/particle.png";
 
         public const string ENEMY_SPRITE = "../../Assets/Graphics/enemy.png";
