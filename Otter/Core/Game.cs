@@ -466,7 +466,7 @@ namespace Otter {
             GameOptions = new Dictionary<string, string>();
             ConfigFile = new Dictionary<string, string>();
 
-            cameraZoom = 1;
+            cameraZoom = 1.25f;
             cameraAngle = 0;
             Width = width;
             Height = height;
