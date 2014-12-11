@@ -77,9 +77,18 @@ namespace OtterTutorial.Entities
         {
             base.Update();
 
+
             if (Global.paused)
             {
                 return;
+            }
+
+            if (score == 50)
+            {
+                //jb - testing win game scenario
+                Global.TUTORIAL.Scene.RemoveAll();
+                Global.TUTORIAL.SwitchScene(new EndScene());
+                //
             }
 
             // Used to determine which directions we are moving in
@@ -199,6 +208,33 @@ namespace OtterTutorial.Entities
                 dead = true;
                 Global.TUTORIAL.Scene.Add(new Explosion(X, Y, true));
                 RemoveSelf();
+            }
+
+            // Access the Enemy's Collider to check collision
+            var colleb = Collider.Collide(X, Y, (int)Global.Type.BULLET);
+            if (colleb != null)
+            {
+                Bullet b = (Bullet)colleb.Entity;
+                if (b.shooter == "enemy")
+                {
+                    b.Destroy();
+                    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
+
+                    DamageText dt = new DamageText(X, Y, "1");
+                    Global.TUTORIAL.Scene.Add(dt);
+
+                    //hurt.Play();
+
+                    health--; // Decrement the health by 1 for each Bullet that hits
+                    if (health <= 0)
+                    {
+                        // Add a new Explosion and remove self from the Scene if out of health
+                        
+                        dead = true;
+                        Global.TUTORIAL.Scene.Add(new Explosion(X, Y, true));
+                        RemoveSelf();
+                    }
+                }
             }
 
             var colli = Collider.Collide(X, Y, (int)Global.Type.ITEM);

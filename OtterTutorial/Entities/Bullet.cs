@@ -237,14 +237,14 @@ namespace OtterTutorial.Entities
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
                 RemoveSelf();
             }
-            var collp = Collider.Collide(X, Y, (int)Global.Type.PLAYER);
-            if (collp != null)
-            {
-                Player p = (Player)collp.Entity;
-                //p.TakeDamage(1);
-                this.RemoveSelf();
-                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
-            }
+            //var collp = Collider.Collide(X, Y, (int)Global.Type.PLAYER);
+            //if (collp != null)
+            //{
+            //    Player p = (Player)collp.Entity;
+            //    //p.TakeDamage(1);
+            //    this.RemoveSelf();
+            //    Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y, 1));
+            //}
         }
 
         public void StraightBulletMovement(ref GameScene scene)

@@ -62,7 +62,7 @@ namespace OtterTutorial.Entities
 
             if (bossExplode)
             {
-                Global.gameMusic.Stop();
+                //Global.gameMusic.Stop();
                 Global.TUTORIAL.Scene.RemoveAll();
                 Global.TUTORIAL.SwitchScene(new EndScene());
             }
