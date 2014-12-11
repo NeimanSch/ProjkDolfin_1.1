@@ -227,6 +227,11 @@ namespace OtterTutorial.Entities
                 X -= enemyBulletSpeed;
             }
             Y = (float)slope * X + b;
+            if (scene.grid.GetRect(X, Y, X + WIDTH, Y + HEIGHT, false))
+            {
+                Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
+                RemoveSelf();
+            }
             if (X == Global.player.X && Y == Global.player.Y)
             {
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));

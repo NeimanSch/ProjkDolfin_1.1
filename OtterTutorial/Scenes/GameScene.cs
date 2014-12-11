@@ -26,10 +26,6 @@ namespace OtterTutorial.Scenes
 
         public Scene nextScene;
 
-        // Use a J,I coordinate system for our map's screens to avoid 
-        // confusion with our already existing X,Y coordinate systems
-        public int screenJ;
-        public int screenI;
         public Text scoreText;
         public Text healthText;
         public Text pauseText;
@@ -37,14 +33,11 @@ namespace OtterTutorial.Scenes
         public Menu pauseMenu;
         public Texture texture = new Texture(Assets.TILESET);
         public Menu playerStats;
-                
 
         // Our new constructor takes in the new J,I coordinates, and a Player object
         public GameScene(int nextJ = 0, int nextI = 0, Player player = null)
             : base()
         {
-            screenJ = nextJ;
-            screenI = nextI;
             // If a Player object isn't passed in, start at the default x,y position of 100,100
             if (player == null)
             {
@@ -71,9 +64,6 @@ namespace OtterTutorial.Scenes
             Global.player.Y = planetMap.mapPlayerSpawnLocation.Item2;
 
             LoadWorld(mapToLoad, solidsToLoad);
-            // Since we are constantly switching Scenes we need to do some checking,
-            // ensuring that the music doesn't get restarted.
-            // We should probably add an isPlaying boolean to the Music class. I will do this soon.
             if (false)
             {
                 Global.gameMusic = new Music(Assets.MUSIC_GAME);
@@ -101,13 +91,9 @@ namespace OtterTutorial.Scenes
             if (Global.player != null)
             {
                 Add(Global.player);
-                // Never should be paused once transitioning is complete
                 Global.paused = false;
             }
             Add(Global.camShaker);
-            // This is rather crude, as we re-add the Enemy every time we switch screens
-            // A good task beyond these tutorials would be ensuring that non-player
-            // Entities retain their state upon switching screens
             int i = 0;
             foreach (Tuple<float, float> enemyLoc in planetMap.mapEnemySpawnLocations)
             {
@@ -207,49 +193,6 @@ namespace OtterTutorial.Scenes
             this.CameraX = Global.player.X - HALF_SCRENE_X;
             this.CameraY = Global.player.Y - HALF_SCRENE_Y;
             playerStats.Update();
-        }
-
-        // Scroll method that moves the CameraX, CameraY
-        // coordinates by the multiple dx, dy values
-        public void Scroll(int dx, int dy)
-        {
-            // Pause the game when we start scrolling
-            Global.paused = true;
-            // Set the nextScene and call UpdateLists to 
-            // ensure all Entities are cleaned up properly
-            nextScene = new GameScene(screenJ, screenI, Global.player);
-            nextScene.UpdateLists();
-            // Push the player over with the screen via a Tween
-            float pushPlayerX = dx * 30;
-            float pushPlayerY = dy * 30;
-            Glide.GlideManagerImpl.Tweener.Tween(Global.player, new
-            {
-                X = Global.player.X + pushPlayerX,
-                Y = Global.player.Y + pushPlayerY
-            }, 30f, 0);
-            // Finally, push the Camera over by a multiple of the 
-            // Game's width and height, and set the call back method
-            // to our new ScrollDone method
-            Glide.GlideManagerImpl.Tweener.Tween(this, new
-            {
-                CameraX = CameraX + Global.GAME_WIDTH * dx,
-                CameraY = CameraY + Global.GAME_HEIGHT * dy
-            }, 30f, 0).OnComplete(ScrollDone);
-        }
-
-        // Method called once the screen scrolling is all done
-        public void ScrollDone()
-        {
-            // Once the scroll is done remove all added graphics
-            // and call UpdateLists to clean everything up and 
-            // then switch to the nextScene
-            RemoveAll();
-            UpdateLists();
-            // Set the nextScene's Camera values to the current Scene's 
-            // freshly tweened camera values, otherwise we snap back to screen 0,0
-            nextScene.CameraX = CameraX;
-            nextScene.CameraY = CameraY;
-            Global.TUTORIAL.SwitchScene(nextScene);
         }
 
         public void DrawPauseMenu()

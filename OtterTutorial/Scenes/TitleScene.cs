@@ -13,7 +13,7 @@ namespace OtterTutorial.Scenes
         // Create a new Image object, referencing the Otter image in our Assets folder
         public Image titleImage = new Image(Assets.TITLE_IMG);
 
-        public Text titleText = new Text("Otter Tutorial", Assets.FONT_PANIC, 84);
+        public Text titleText = new Text("Stellar Destiny", Assets.FONT_PANIC, 84);
         public Text enterText = new Text("Press Enter", Assets.FONT_PANIC, 40);
 
         public const float TIMER_BLINK = 25f;
