@@ -20,6 +20,7 @@ namespace OtterTutorial
         public const string PLAYER_EXPLOSION = "../../Assets/Graphics/explosion.png";
         public const string PLAYER_PARTICLE = "../../Assets/Graphics/particle.png";
         public const string BULLET = "../../Assets/Graphics/bullet.png";
+        public const string ENEMY_BULLET = "../../Assets/Graphics/enemy-bullet.png";
 
         public const string SND_BULLET_SHOOT = "../../Assets/Sound/bulletShoot.ogg";
         public const string SND_BULLET_EXPLODE = "../../Assets/Sound/bulletExplode.ogg";

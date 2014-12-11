@@ -93,6 +93,7 @@
     <Content Include="Assets\Graphics\bossBullet.png" />
     <Content Include="Assets\Graphics\bossParticle.png" />
     <Content Include="Assets\Graphics\bullet.png" />
+    <Content Include="Assets\Graphics\enemy-bullet.png" />
     <Content Include="Assets\Graphics\explosion.png" />
     <Content Include="Assets\Graphics\item.png" />
     <Content Include="Assets\Graphics\item2.png" />

@@ -53,7 +53,7 @@ namespace OtterTutorial.Entities
         public double pDist = 0;
         public string shooter;
         public Vector2 shootPt;
-        public double theta;
+        public double slope;
 
         public BulletData data;
 
@@ -100,9 +100,11 @@ namespace OtterTutorial.Entities
             if (shooter == "enemy")
             {
                 //theta = Math.Atan((double)((Global.player.Y - Y) / (Global.player.X - X)));
-                theta = (Global.player.Y - Y) / (Global.player.X - X);
+                slope = (Global.player.Y - Y) / (Global.player.X - X);
                 b = Y - (X * ((Global.player.Y - Y) / (Global.player.X - X)));
                 xDiff = Global.player.X - X;
+                image = new Image(Assets.ENEMY_BULLET);
+                Graphic = image;
             }
         }
 
@@ -224,7 +226,7 @@ namespace OtterTutorial.Entities
             {
                 X -= enemyBulletSpeed;
             }
-            Y = (float)theta * X + b;
+            Y = (float)slope * X + b;
             if (X == Global.player.X && Y == Global.player.Y)
             {
                 Global.TUTORIAL.Scene.Add(new BulletExplosion(X, Y));
