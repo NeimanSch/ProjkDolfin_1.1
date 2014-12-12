@@ -118,6 +118,7 @@ namespace OtterTutorial.Entities
                 else if (Global.PlayerSession.Controller.B.Down)
                 {
                     direction = Global.DIR_RIGHT;
+                    Global.player.sprite.Play("walkRight");
                 }
                 else if (Global.PlayerSession.Controller.X.Down)
                 {

@@ -111,12 +111,12 @@ namespace OtterTutorial.Entities
                     attributes.Add(attribute_name, attribute_value);
 
 
-                    Text alertText = new Text(pickup_name, 12);
-                    alertText.CenterOrigin();
-                    alertText.X = this.X + 10; //OtterTutorial.Global.player.X - 10;
-                    alertText.Y = this.Y + 30;// OtterTutorial.Global.player.Y; 
+                    //Text alertText = new Text(pickup_name, 12);
+                    //alertText.CenterOrigin();
+                    //alertText.X = this.X + 10; //OtterTutorial.Global.player.X - 10;
+                    //alertText.Y = this.Y + 30;// OtterTutorial.Global.player.Y; 
                     
-                    OtterTutorial.Scenes.GameScene.Instance.AddGraphic(alertText);
+                    //OtterTutorial.Scenes.GameScene.Instance.AddGraphic(alertText);
                 }
             }
             return spriteValue;

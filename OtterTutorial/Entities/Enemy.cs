@@ -26,6 +26,7 @@ namespace OtterTutorial.Entities
         public float speed = 0.8f;
 
         public Spritemap<string> sprite;
+        public Spritemap<string> blood;
 
         public const float MOVE_DISTANCE = 300;
 
@@ -56,6 +57,8 @@ namespace OtterTutorial.Entities
             type = 1;
             state = "idle";
 
+            blood = new Spritemap<string>(Assets.BLOOD, 32, 32);
+            blood.Alpha = .75f;
             // Set up the Spritemap in the same manner we did for the player
             sprite = new Spritemap<string>(Assets.ENEMY_SPRITE, 32, 40);
             sprite.Add("standLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
@@ -121,6 +124,9 @@ namespace OtterTutorial.Entities
                         Global.TUTORIAL.Scene.Add(new Explosion(X, Y));
                         Global.TUTORIAL.Scene.Add(new Item(X, Y));
                         Global.player.score++;
+
+                        Global.TUTORIAL.Scene.Add(new Entity(X,Y,blood,null));
+                        
                         RemoveSelf();
                     }
                 }

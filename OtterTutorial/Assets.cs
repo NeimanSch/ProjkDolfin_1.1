@@ -47,6 +47,8 @@ namespace OtterTutorial
         public const string ITEM = "../../Assets/Graphics/item.png";
         public const string PEZ  = "../../Assets/Graphics/pez.png";
 
+        public const string BLOOD = "../../Assets/Graphics/blood.png";
+
         public const string ITEMS = "../../Assets/Data/Items/items.xml";
     }
 }

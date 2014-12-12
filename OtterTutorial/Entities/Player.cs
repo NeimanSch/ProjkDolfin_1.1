@@ -83,13 +83,13 @@ namespace OtterTutorial.Entities
                 return;
             }
 
-            if (score == 50)
-            {
-                //jb - testing win game scenario
-                Global.TUTORIAL.Scene.RemoveAll();
-                Global.TUTORIAL.SwitchScene(new EndScene());
-                //
-            }
+            //if (score == 50)
+            //{
+            //    //jb - testing win game scenario
+            //    Global.TUTORIAL.Scene.RemoveAll();
+            //    Global.TUTORIAL.SwitchScene(new EndScene());
+            //    //
+            //}
 
             // Used to determine which directions we are moving in
             bool horizontalMovement = true;

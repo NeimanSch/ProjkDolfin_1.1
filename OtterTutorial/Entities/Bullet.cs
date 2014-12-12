@@ -15,7 +15,7 @@ namespace OtterTutorial.Entities
 
         // Default bullet speed
         public float bulletSpeed = 10.0f;
-        public float enemyBulletSpeed = 1.0f;
+        public float enemyBulletSpeed = 5.0f;
         
 
         // Direction the bullet is going to travel in

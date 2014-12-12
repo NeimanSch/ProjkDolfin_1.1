@@ -183,7 +183,8 @@ namespace OtterTutorial.Scenes
             if (Global.paused)
             {
                 //DrawPauseMenu();
-                //pauseMenu.Update();
+                //pauseMenu.remove();
+               // Global.TUTORIAL.Stop();
                 return;
             }
             else
