@@ -61,14 +61,15 @@ namespace OtterTutorial.Entities
             blood.Alpha = .75f;
             // Set up the Spritemap in the same manner we did for the player
             sprite = new Spritemap<string>(Assets.ENEMY_SPRITE, 32, 40);
-            sprite.Add("standLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("standRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("standDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
-            sprite.Add("standUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
-            sprite.Add("walkLeft", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("walkRight", new int[] { 0, 1 }, new float[] { 10f, 10f });
-            sprite.Add("walkDown", new int[] { 3, 4 }, new float[] { 10f, 10f });
-            sprite.Add("walkUp", new int[] { 6, 7 }, new float[] { 10f, 10f });
+            sprite.Add("standLeft", new int[] { 0, 1, 2 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("standRight", new int[] { 0, 1, 2 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("standDown", new int[] { 3, 4, 5 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("standUp", new int[] { 6, 7, 8 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("walkLeft", new int[] { 0, 1, 2 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("walkRight", new int[] { 0, 1, 2 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("walkDown", new int[] { 3, 4, 5 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("walkUp", new int[] { 6, 7, 8 }, new float[] { 10f, 10f, 10f });
+            sprite.Add("dead", new int[] { 9, 10, 11 }, new float[] { 15f, 15f, 15f });
             sprite.Play("standLeft");
 
             Graphic = sprite;
@@ -105,14 +106,15 @@ namespace OtterTutorial.Entities
 
             // Access the Enemy's Collider to check collision
             var collb = Collider.Collide(X, Y, (int)Global.Type.BULLET);
-            if (collb != null)
+            //jb - 99 = dead
+            if (collb != null && this.type != 99)
             {
                 Bullet b = (Bullet)collb.Entity;
                 if (b.shooter == "player")
                 {
                     b.Destroy();
 
-                    DamageText dt = new DamageText(X, Y, "1234");
+                    DamageText dt = new DamageText(X, Y, "1");
                     Global.TUTORIAL.Scene.Add(dt);
 
                     hurt.Play();
@@ -125,9 +127,11 @@ namespace OtterTutorial.Entities
                         Global.TUTORIAL.Scene.Add(new Item(X, Y));
                         Global.player.score++;
 
-                        Global.TUTORIAL.Scene.Add(new Entity(X,Y,blood,null));
                         
-                        RemoveSelf();
+                        //RemoveSelf();
+                        sprite.Play("dead");
+                        this.type = 99;
+                        Global.TUTORIAL.Scene.Add(new Entity(X, Y-20, blood, null));
                     }
                 }
             }
@@ -200,6 +204,11 @@ namespace OtterTutorial.Entities
                     //shoot = true;
                     distance++;
                     sineWave(newPOS, checkScene);
+                    break;
+
+                case 99:
+                     //dead
+                    shoot = false;
                     break;
             }
         }

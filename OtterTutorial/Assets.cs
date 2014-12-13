@@ -13,6 +13,7 @@ namespace OtterTutorial
         public const string FONT_PANIC = "../../Assets/Fonts/SpaceAge.ttf";
 
         public const string MUSIC_TITLE = "../../Assets/Music/menu.ogg";
+        public const string MUSIC_TITLE_TEST = "../../Assets/Music/test-title-track.ogg";
         public const string MUSIC_GAME = "../../Assets/Music/game.ogg";
 
         public const string PLAYER = "../../Assets/Graphics/player4.png";

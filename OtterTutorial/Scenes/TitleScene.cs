@@ -20,7 +20,7 @@ namespace OtterTutorial.Scenes
         public float blinkTimer = 0;
 
         // Create a new, looping sound object, with our MUSIC_TITLE as its source
-        public Music titleSong = new Music(Assets.MUSIC_TITLE, true);
+        public Music titleSong = new Music(Assets.MUSIC_TITLE_TEST, true);
 
         // We will tween this image in when the Scene switches
         public Image darkScreen = Image.CreateRectangle(Global.GAME_WIDTH, Global.GAME_HEIGHT, new Otter.Color("000000"));
