@@ -78,7 +78,7 @@ namespace OtterTutorial.Entities
             // Set our Enemy hitbox to be 32 x 40. This goes in our Enemy class
             SetHitbox(32, 40, (int)Global.Type.ENEMY);
 
-            enemyFireCounter = 0;
+            enemyFireCounter = Global.rand.Next(10, 70);
 
             Random startDeg = new Random();
             circAngle = startDeg.Next(0, 360);
@@ -159,6 +159,8 @@ namespace OtterTutorial.Entities
             // If going left, flip the spritesheet
             sprite.FlippedX = direction;
             Move();
+            
+           
             if ((enemyFireCounter % 100 == 0) && shoot)
             {
                 Global.TUTORIAL.Scene.Add(new Bullet(X, Y, "enemy"));

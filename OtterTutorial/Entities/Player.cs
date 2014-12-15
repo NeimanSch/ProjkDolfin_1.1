@@ -61,11 +61,12 @@ namespace OtterTutorial.Entities
             SetHitbox(20, 20, (int)Global.Type.PLAYER);
 
             equippedWeapon = new Weapon();
+            Random r = new Random();
 
             // Set Defaults for starting weapon
-            equippedWeapon.baseDamage = 1;
-            equippedWeapon.bulletCount = 1;
-            equippedWeapon.fireRate = 40;
+            equippedWeapon.baseDamage = r.Next(1, 2); // 1;
+            equippedWeapon.bulletCount = r.Next(1, 2); // 1;
+            equippedWeapon.fireRate = r.Next(35, 50); // 40;
             
             sprite.Play("standDown");
 
