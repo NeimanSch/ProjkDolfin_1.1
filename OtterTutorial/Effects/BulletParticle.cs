@@ -23,6 +23,12 @@ namespace OtterTutorial.Effects
 
         public override void Update()
         {
+
+            if (Global.paused)
+            {
+                return;
+            }
+
             base.Update();
 
             // Have our particle drift up a bit as it dissolves

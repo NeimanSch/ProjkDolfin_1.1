@@ -57,8 +57,8 @@ namespace OtterTutorial.Entities
             type = 1;
             state = "idle";
 
-            blood = new Spritemap<string>(Assets.BLOOD, 32, 32);
-            blood.Alpha = .75f;
+            //blood = new Spritemap<string>(Assets.BLOOD, 32, 32);
+            //blood.Alpha = .75f;
             // Set up the Spritemap in the same manner we did for the player
             sprite = new Spritemap<string>(Assets.ENEMY_SPRITE, 32, 40);
             sprite.Add("standLeft", new int[] { 0, 1, 2 }, new float[] { 10f, 10f, 10f });
@@ -70,6 +70,7 @@ namespace OtterTutorial.Entities
             sprite.Add("walkDown", new int[] { 3, 4, 5 }, new float[] { 10f, 10f, 10f });
             sprite.Add("walkUp", new int[] { 6, 7, 8 }, new float[] { 10f, 10f, 10f });
             sprite.Add("dead", new int[] { 9, 10, 11 }, new float[] { 15f, 15f, 15f });
+
             sprite.Play("standLeft");
 
             Graphic = sprite;
@@ -97,41 +98,61 @@ namespace OtterTutorial.Entities
 
         public override void Update()
         {
-            base.Update();
-
             if (Global.paused)
             {
                 return;
             }
 
+            if (type == 99)
+            {
+                if (sprite.CurrentFrame == 11)
+                {
+                    sprite.Stop();
+                }
+                
+                this.RemoveColliders();
+                return;
+            }
+            else
+            {
+
+                base.Update();
+
+            }
+
+
             // Access the Enemy's Collider to check collision
             var collb = Collider.Collide(X, Y, (int)Global.Type.BULLET);
             //jb - 99 = dead
-            if (collb != null && this.type != 99)
+            if (collb != null )
             {
                 Bullet b = (Bullet)collb.Entity;
                 if (b.shooter == "player")
                 {
                     b.Destroy();
 
-                    DamageText dt = new DamageText(X, Y, "1");
+                    DamageText dt = new DamageText(X, Y, Convert.ToString(Global.player.equippedWeapon.baseDamage));
                     Global.TUTORIAL.Scene.Add(dt);
 
                     hurt.Play();
 
-                    health--; // Decrement the health by 1 for each Bullet that hits
-                    if (health <= 0)
+                    //health--; // Decrement the health by 1 for each Bullet that hits
+
+                    health -= Global.player.equippedWeapon.baseDamage;
+
+                    if (health <= 0 && this.type != 99)
                     {
                         // Add a new Explosion and remove self from the Scene if out of health
                         Global.TUTORIAL.Scene.Add(new Explosion(X, Y));
-                        Global.TUTORIAL.Scene.Add(new Item(X, Y));
+                        //moving the item so it's not on top of the enemy sprite.
+                        Global.TUTORIAL.Scene.Add(new Item(X-16, Y-16));
                         Global.player.score++;
 
                         
                         //RemoveSelf();
                         sprite.Play("dead");
                         this.type = 99;
-                        Global.TUTORIAL.Scene.Add(new Entity(X, Y-20, blood, null));
+                        //Global.TUTORIAL.Scene.Add(new Entity(X, Y-20, blood, null));
                     }
                 }
             }

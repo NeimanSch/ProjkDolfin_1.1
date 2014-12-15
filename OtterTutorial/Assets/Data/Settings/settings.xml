@@ -1,0 +1,13 @@
+<settings>
+	<graphics>
+		<resolution>
+			<width>1024</width>
+			<height>768></height>
+		</resolution>
+		<fullscreen>0</fullscreen>
+	</graphics>
+	<audio>
+		<musicVolume></musicVolume>
+		<effectsVolume></effectsVolume>
+	</audio>
+</settings>

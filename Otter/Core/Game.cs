@@ -686,6 +686,13 @@ namespace Otter {
         }
 
         void Update() {
+
+
+            if (Paused)
+            {
+                return;
+            }
+
             Instance = this;
             
             GlideManager.Tweener.Update(DeltaTime);
@@ -708,6 +715,13 @@ namespace Otter {
         }
 
         void Render() {
+
+
+            if (Paused)
+            {
+                return;
+            }
+
             Window.Clear(LetterBoxColor.SFMLColor);
             Surface.FillColor = Color;
             Surface.Fill(Color);
@@ -1299,7 +1313,7 @@ namespace Otter {
 
         #region Internal
 
-        internal bool countRendering = true;
+        public bool countRendering = true;
 
         internal int debuggerAdvance = 0;
 

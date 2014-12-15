@@ -19,14 +19,14 @@ namespace OtterTutorial.Util
         public int padding;
         public Color bgColor;
         public Text[] items;
-        public float a = 0.5f;
+        public float a = 1f;
 
         // x pos, y pos, padding, color, text elements in menu
         public Menu(float x, float y, int pad, Color c, params Text[] g)
         {
             items = g;
             bgColor = c;
-            container = Image.CreateRectangle(g[0].Width + (2 * pad), 2 * g[0].Height + (2 * pad), c);
+            container = Image.CreateRectangle(g[0].Width + (4 * pad), 4 * g[0].Height + (4 * pad), c);
             container.X = x;
             container.Y = y;
             Scenes.GameScene.Instance.AddGraphic(container);
@@ -41,12 +41,35 @@ namespace OtterTutorial.Util
             {
                 container.X = Global.player.X + (GameScene.HALF_SCRENE_X - container.Width);
                 container.Y = Global.player.Y - (GameScene.HALF_SCRENE_Y) + 2f;
-                items[1].X = container.X + container.HalfWidth;
-                items[1].Y = container.Y + 10;
                 items[0].X = container.X + container.HalfWidth;
-                items[0].Y = items[1].Bottom + items[0].HalfHeight + 10;
+                items[1].X = container.X + container.HalfWidth;
+                
+                items[0].Y = container.Y + 10;
+                items[1].Y = items[0].Bottom + items[1].HalfHeight + 10;
+                
                 items[1].String = "Score: " + Global.player.score.ToString();
                 items[0].String = "Health: " + Global.player.health.ToString();
+            }
+            else if (items.Length == 4)
+            {
+                container.X = Global.player.X + (GameScene.HALF_SCRENE_X - container.Width);
+                container.Y = Global.player.Y - (GameScene.HALF_SCRENE_Y) + 2f;
+                
+                items[0].X = container.X + 50;
+                items[1].X = container.X + 65;
+                items[2].X = container.X + 60;
+                items[3].X = container.X + 65;
+
+                items[0].Y = container.Y + 10;
+                items[1].Y = items[0].Bottom + items[1].HalfHeight + 10;
+                items[2].Y = items[1].Bottom + items[2].HalfHeight + 10;
+                items[3].Y = items[2].Bottom + items[3].HalfHeight + 10;
+
+                items[1].String = "Kills: " + Global.player.score.ToString();
+                items[0].String = "Health: " + Global.player.health.ToString();
+                items[2].String = "Damage: " + Global.player.equippedWeapon.baseDamage.ToString();
+                items[3].String = "Bullets: " + Global.player.equippedWeapon.bulletCount.ToString();
+
             }
             else if (items.Length == 1)
             {

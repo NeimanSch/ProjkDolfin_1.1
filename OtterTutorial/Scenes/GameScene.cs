@@ -28,11 +28,14 @@ namespace OtterTutorial.Scenes
 
         public Text scoreText;
         public Text healthText;
+        public Text weaponText;
+        public Text bulletText;
         public Text pauseText;
         public Image Menu;
         public Menu pauseMenu;
         public Texture texture = new Texture(Assets.TILESET);
         public Menu playerStats;
+        public Menu weaponStats;
 
         // Our new constructor takes in the new J,I coordinates, and a Player object
         public GameScene(int nextJ = 0, int nextI = 0, Player player = null)
@@ -42,6 +45,7 @@ namespace OtterTutorial.Scenes
             if (player == null)
             {
                 Global.player = new Player(100, 100);
+                Global.player.equippedWeapon.GenerateWeapon();
             }
             else
             {
@@ -112,23 +116,45 @@ namespace OtterTutorial.Scenes
                 }
                 i += 1;
             }
-            
-            scoreText = new Text("Score: " + Global.player.score.ToString(), Assets.FONT_PANIC, 24);
+
+            Color textColor = new Otter.Color("3D7BFF");
+
+            scoreText = new Text("Kills: " + Global.player.score.ToString(), Assets.FONT_PANIC, 14);
             //scoreText.OutlineColor = new Otter.Color("7FA8D2");
             //scoreText.OutlineThickness = 3; 
+            scoreText.Color = textColor;
             scoreText.CenterOrigin();
             scoreText.X = Global.player.X;
             scoreText.Y = Global.player.Y;
-            healthText = new Text("Health: " + Global.player.health.ToString(), Assets.FONT_PANIC, 24);
+            healthText = new Text("Health: " + Global.player.health.ToString(), Assets.FONT_PANIC, 14);
             //healthText.OutlineColor = new Otter.Color("d2807f");
             //healthText.OutlineThickness = 3;
+            healthText.Color = textColor;
             healthText.CenterOrigin();
             healthText.X = Global.player.X;
             healthText.Y = Global.player.Y;
-            playerStats = new Menu(Global.player.X, Global.player.Y, 20, Color.Grey, healthText, scoreText);
+
+            weaponText = new Text("Damage: " + Global.player.equippedWeapon.baseDamage.ToString(), Assets.FONT_PANIC, 14);
+            weaponText.Color = textColor;
+            weaponText.CenterOrigin();
+            weaponText.X = Global.player.X;
+            weaponText.Y = Global.player.Y;
+            bulletText = new Text("Bullets: " + Global.player.equippedWeapon.bulletCount.ToString(), Assets.FONT_PANIC, 14);
+            bulletText.Color = textColor;
+            bulletText.CenterOrigin();
+            bulletText.X = Global.player.X;
+            bulletText.Y = Global.player.Y;
+
+            playerStats = new Menu(Global.player.X, Global.player.Y, 20, Color.White, scoreText, healthText, weaponText, bulletText);
             playerStats.container.OutlineColor = Color.Gray;
             playerStats.container.OutlineThickness = 2f;
-            playerStats.container.Alpha = 0.3f;
+            playerStats.container.Alpha = .75f;
+
+            //weaponStats = new Menu(Global.player.X + 400, Global.player.Y + 400, 20, Color.Grey, weaponText, bulletText);
+            //weaponStats.container.OutlineColor = Color.Gray;
+            //weaponStats.container.OutlineThickness = 2f;
+            //weaponStats.container.Alpha = 0.3f;
+
             pauseText = new Text("Game Paused", Assets.FONT_PANIC, 24);
             pauseText.OutlineColor = new Otter.Color(Color.Gold);
             pauseText.OutlineThickness = 3;
@@ -173,32 +199,36 @@ namespace OtterTutorial.Scenes
                 if (!Global.paused)
                 {
                     Global.paused = true;
+                   // Game.PauseToggle();
                 }
                 else
                 {
                     Global.paused = false;
+                    pauseMenu.remove();
+                    //countRendering = false;
                 }
                 return;
             }
             if (Global.paused)
             {
-                //DrawPauseMenu();
-                //pauseMenu.remove();
-               // Global.TUTORIAL.Stop();
+                DrawPauseMenu();
+                pauseMenu.remove();
+                
                 return;
             }
-            else
+            else if (!Global.paused)
             {
-                
+                //pauseMenu.remove();
             }
             this.CameraX = Global.player.X - HALF_SCRENE_X;
             this.CameraY = Global.player.Y - HALF_SCRENE_Y;
             playerStats.Update();
+            //weaponStats.Update();
         }
 
         public void DrawPauseMenu()
         {
-            pauseMenu = new Menu(Global.player.X, Global.player.Y, 50, Color.Black, pauseText);
+            pauseMenu = new Menu(Global.player.X - HALF_SCRENE_X - HALF_SCRENE_Y, Global.player.Y, 50, Color.Black, pauseText);
         }
     }
 }

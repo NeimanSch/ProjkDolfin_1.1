@@ -29,7 +29,7 @@ namespace OtterTutorial.Entities
             fireRate = 100;
             clip = new List<BulletData>();
 
-            GenerateWeapon();
+            //GenerateWeapon();
         }
 
 
@@ -41,11 +41,11 @@ namespace OtterTutorial.Entities
             int oddAngle = 0;
             int oddBulletCount = 0;
             int angle = 0;
-            fireRate = r.Next(5, 50);
-            baseDamage = r.Next(5, 50);
-            bulletCount = r.Next(1, 10);
+            fireRate = Global.player.equippedWeapon.fireRate; // r.Next(5, 50);
+            baseDamage = Global.player.equippedWeapon.baseDamage;//r.Next(5, 50);
+            bulletCount = Global.player.equippedWeapon.bulletCount; //r.Next(1, 10);
+            //Console.WriteLine(bulletCount);
             Console.WriteLine(bulletCount);
-
             //All the below code is for figuring out how to angle the projectiles.
             if (bulletCount % 2 == 0)
             {
@@ -107,6 +107,8 @@ namespace OtterTutorial.Entities
         //Shoot that shit!
         public void fire()
         {
+            //Console.WriteLine(bulletCount);
+
             if (fireCooldown <= 0)
             {
                 int direction = -1;

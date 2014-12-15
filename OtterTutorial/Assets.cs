@@ -23,7 +23,7 @@ namespace OtterTutorial
         public const string BULLET = "../../Assets/Graphics/bullet.png";
         public const string ENEMY_BULLET = "../../Assets/Graphics/enemy-bullet.png";
 
-        public const string SND_BULLET_SHOOT = "../../Assets/Sound/bulletShoot.ogg";
+        public const string SND_BULLET_SHOOT = "../../Assets/Sound/gun-test.ogg";
         public const string SND_BULLET_EXPLODE = "../../Assets/Sound/bulletExplode.ogg";
         public const string SND_ENEMY_HURT = "../../Assets/Sound/enemyHurt.ogg";
 
@@ -51,5 +51,7 @@ namespace OtterTutorial
         public const string BLOOD = "../../Assets/Graphics/blood.png";
 
         public const string ITEMS = "../../Assets/Data/Items/items.xml";
+        public const string SETTINGS = "../../Assets/Data/Settings/settings.xml";
+    
     }
 }

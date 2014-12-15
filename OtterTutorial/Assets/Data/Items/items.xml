@@ -5,22 +5,52 @@
 		<droprate_min>25</droprate_min>
 		<droprate_max>50</droprate_max>
 		<sprites>
-			<sprite>pez.png</sprite>
+			<sprite>wings.png</sprite>
 			<height>32</height>
 			<width>32</width>
 		</sprites>
 		<attributes>
 			<name>movementSpeed</name>
-			<value>2</value>
+			<value>1</value>
 		</attributes>
 	</item>
 	<item>
 		<id>1</id>
-		<name>fire up</name>
-		<droprate_min>0</droprate_min>
+		<name>bullet up</name>
+		<droprate_min>12</droprate_min>
 		<droprate_max>25</droprate_max>
 		<sprites>
-			<sprite>pez_blue.png</sprite>
+			<sprite>clip.png</sprite>
+			<height>32</height>
+			<width>32</width>
+		</sprites>
+		<attributes>
+			<name>bulletUp</name>
+			<value>1</value>
+		</attributes>
+	</item>
+	<item>
+		<id>2</id>
+		<name>Damage up</name>
+		<droprate_min>70</droprate_min>
+		<droprate_max>99</droprate_max>
+		<sprites>
+			<sprite>damage-up.png</sprite>
+			<height>32</height>
+			<width>32</width>
+		</sprites>
+		<attributes>
+			<name>damageUp</name>
+			<value>1</value>
+		</attributes>
+	</item>
+	<item>
+		<id>3</id>
+		<name>Rate up</name>
+		<droprate_min>51</droprate_min>
+		<droprate_max>76</droprate_max>
+		<sprites>
+			<sprite>needle.png</sprite>
 			<height>32</height>
 			<width>32</width>
 		</sprites>
@@ -30,17 +60,17 @@
 		</attributes>
 	</item>
 	<item>
-		<id>2</id>
-		<name>range up</name>
-		<droprate_min>51</droprate_min>
-		<droprate_max>76</droprate_max>
+		<id>4</id>
+		<name>Health Up</name>
+		<droprate_min>0</droprate_min>
+		<droprate_max>11</droprate_max>
 		<sprites>
-			<sprite>pez_yellow.png</sprite>
+			<sprite>health-kit.png</sprite>
 			<height>32</height>
 			<width>32</width>
 		</sprites>
 		<attributes>
-			<name>fireRange</name>
+			<name>healthUp</name>
 			<value>1</value>
 		</attributes>
 	</item>

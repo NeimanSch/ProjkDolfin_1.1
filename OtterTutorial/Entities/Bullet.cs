@@ -432,6 +432,12 @@ namespace OtterTutorial.Entities
 
         public override void Update()
         {
+
+            if (Global.paused)
+            {
+                return;
+            }
+
             base.Update();
 
             GameScene checkScene = (GameScene)Scene;

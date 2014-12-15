@@ -75,9 +75,8 @@ namespace OtterTutorial.Entities
             bool itemFound = false;
             string pickup_name = "";
 
-            Random random = new Random();
-            int randomNumber = random.Next(0, 100);
-
+            int randomNumber = Global.rand.Next(0, 100);
+            
             Console.WriteLine(randomNumber);
 
             foreach (XmlNode node in nodes)

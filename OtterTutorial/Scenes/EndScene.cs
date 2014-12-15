@@ -25,7 +25,7 @@ namespace OtterTutorial.Scenes
             if (Global.player.dead)
             {
                 endImage = new Image(Assets.END_GAME_OVER);
-                endText = new Text("Oh no! You a bitch! :(", Assets.FONT_PANIC, 60);
+                endText = new Text("Oh no! You died! :(", Assets.FONT_PANIC, 60);
                 endText.OutlineColor = new Otter.Color("FF0000");
             }
             else

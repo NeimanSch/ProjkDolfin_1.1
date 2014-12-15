@@ -62,6 +62,11 @@ namespace OtterTutorial.Entities
 
             equippedWeapon = new Weapon();
 
+            // Set Defaults for starting weapon
+            equippedWeapon.baseDamage = 1;
+            equippedWeapon.bulletCount = 1;
+            equippedWeapon.fireRate = 40;
+            
             sprite.Play("standDown");
 
            // SetHitbox(WIDTH, HEIGHT, (int)Global.Type.PLAYER);
@@ -75,13 +80,13 @@ namespace OtterTutorial.Entities
 
         public override void Update()
         {
-            base.Update();
-
 
             if (Global.paused)
             {
                 return;
             }
+
+            base.Update();
 
             //if (score == 50)
             //{
@@ -243,20 +248,44 @@ namespace OtterTutorial.Entities
                 Item i = (Item)colli.Entity;
                 if (i.attributes.ContainsKey("movementSpeed"))
                 {
-                    moveSpeed = moveSpeed + (int)i.attributes["movementSpeed"];
+                    //jb- arbitrary cap on movespeed 
+                    if (moveSpeed < 10)
+                    {
+                        moveSpeed = moveSpeed + (int)i.attributes["movementSpeed"];
+                        Console.WriteLine("speed: " + moveSpeed);
+                    }
                 }
                 
                 if (i.attributes.ContainsKey("fireRate"))
                 {
-                    equippedWeapon.bulletSpeed = equippedWeapon.bulletSpeed + (int)i.attributes["fireRate"];
-                    
+                    equippedWeapon.fireRate = equippedWeapon.fireRate - (int)i.attributes["fireRate"];
+                    Console.WriteLine("fireRate: " + equippedWeapon.fireRate);
                 }
 
                 if (i.attributes.ContainsKey("fireRange"))
                 {
                     equippedWeapon.bulletRange = equippedWeapon.bulletRange + (int)i.attributes["fireRange"];
+                    Console.WriteLine("fireRange: " + equippedWeapon.bulletRange);
+                }
+
+                if (i.attributes.ContainsKey("damageUp"))
+                {
+                    equippedWeapon.baseDamage = equippedWeapon.baseDamage + 1;
 
                 }
+
+                if (i.attributes.ContainsKey("bulletUp"))
+                {
+                    equippedWeapon.bulletCount = equippedWeapon.bulletCount + 1;
+                    equippedWeapon.clip.Clear();
+                    equippedWeapon.GenerateWeapon();
+                }
+
+                if (i.attributes.ContainsKey("healthUp"))
+                {
+                    Global.player.health++;
+                }
+
                 i.RemoveSelf();
             }
         }

@@ -12,7 +12,7 @@ namespace Otter {
     /// Class used for managing input from the keyboard, mouse, and joysticks. Updated by the active Game.
     /// </summary>
     public class Input {
-
+        
         #region Static Fields
 
         /// <summary>
