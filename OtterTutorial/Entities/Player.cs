@@ -9,11 +9,11 @@ namespace OtterTutorial.Entities
 {
     public class Player : Entity
     {
-        public const int WIDTH = 22;
-        public const int HEIGHT = 29;
+        public const int WIDTH = 32;
+        public const int HEIGHT = 40;
         public const float DIAGONAL_SPEED = 1.4f;
 
-        public float moveSpeed = 4.0f;
+        public float moveSpeed = 2.0f;
 
         // Our entity's graphic will be a Spritemap
         public Spritemap<string> sprite;
@@ -35,15 +35,15 @@ namespace OtterTutorial.Entities
             // Create a new spritemap, with the player.png image as our source, 32 pixels wide, and 40 pixels tall
             sprite = new Spritemap<string>(Assets.PLAYER2, WIDTH, HEIGHT);
 
-            sprite.Add("standLeft", new int[] { 0 }, new float[] { 5f });
-            sprite.Add("standRight", new int[] { 0 }, new float[] { 5f });
-            sprite.Add("standDown", new int[] { 4 }, new float[] { 5f });
-            sprite.Add("standUp", new int[] { 0 }, new float[] { 5f  });
-            sprite.Add("walkLeft", new int[] { 0,1,2,3 }, new float[] { 5f, 5f, 5f, 5f});
-            sprite.Add("walkRight", new int[] { 0, 1, 2, 3 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("walkDown", new int[] { 4,5,6,7 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("walkUp", new int[] { 0, 1, 2, 3 }, new float[] { 5f, 5f, 5f, 5f });
-            sprite.Add("shootLeft", new int[] { 2,3 }, new float[] {5f,5f});
+            sprite.Add("standLeft", new int[] { 3 }, new float[] { 5f });
+            sprite.Add("standRight", new int[] { 3 }, new float[] { 5f });
+            sprite.Add("standDown", new int[] { 0 }, new float[] { 5f });
+            sprite.Add("standUp", new int[] { 6 }, new float[] { 5f  });
+            sprite.Add("walkLeft", new int[] { 3,4,5 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("walkRight", new int[] { 3, 4, 5 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("walkDown", new int[] { 0,1,2 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("walkUp", new int[] { 6,7,8 }, new float[] { 5f, 5f, 5f, 5f });
+            sprite.Add("shootLeft", new int[] { 4 }, new float[] {5f,5f});
 
             // Tell the spritemap which animation to play when the scene starts
 
@@ -56,7 +56,7 @@ namespace OtterTutorial.Entities
             Graphic.OriginX = 8;
 
             sprite.Play("standDown");
-            sprite.Scale = 2f;
+            sprite.Scale = 1.25f;
 
             SetHitbox(20, 20, (int)Global.Type.PLAYER);
 
@@ -75,7 +75,7 @@ namespace OtterTutorial.Entities
 
         public override void Render()
         {
-            Hitbox.Render();
+            //Hitbox.Render();
             base.Render();
         }
 
@@ -89,7 +89,7 @@ namespace OtterTutorial.Entities
 
             base.Update();
 
-            //if (score == 50)
+            //if (score == 99)
             //{
             //    //jb - testing win game scenario
             //    Global.TUTORIAL.Scene.RemoveAll();
@@ -107,8 +107,13 @@ namespace OtterTutorial.Entities
             float newY;
             GameScene checkScene = (GameScene)Scene;
 
+            // CHECK FOR WEAPON SHOOTAN
+            equippedWeapon.fire();
+            Boolean isShooting = equippedWeapon.fire();
+
+
             // Check horizontal movement
-            if (Global.PlayerSession.Controller.Left.Down)
+            if (Global.PlayerSession.Controller.Button("left").Down)
             {
                 newX = X - moveSpeed;
                 if (!checkScene.grid.GetRect(newX, Y, newX + WIDTH, Y + HEIGHT, false))
@@ -117,10 +122,13 @@ namespace OtterTutorial.Entities
                 }
 
                 direction = Global.DIR_LEFT;
-                sprite.Play("walkLeft");
-                sprite.FlippedX = true;
+                if (!isShooting)
+                {
+                    sprite.Play("walkLeft");
+                    sprite.FlippedX = true;
+                }
             }
-            else if (Global.PlayerSession.Controller.Right.Down)
+            else if (Global.PlayerSession.Controller.Button("right").Down)
             {
                 newX = X + moveSpeed;
                 if (!checkScene.grid.GetRect(newX, Y, newX + WIDTH, Y + HEIGHT, false))
@@ -129,15 +137,18 @@ namespace OtterTutorial.Entities
                 }
 
                 direction = Global.DIR_RIGHT;
-                sprite.Play("walkRight");
-                sprite.FlippedX = false;
+                if (!isShooting)
+                {
+                    sprite.Play("walkRight");
+                    sprite.FlippedX = false;
+                }
             }
             else
             {
                 horizontalMovement = false;
             }
             // Check vertical movement
-            if (Global.PlayerSession.Controller.Up.Down)
+            if (Global.PlayerSession.Controller.Button("up").Down)
             {
                 newY = Y - moveSpeed;
                 if (!checkScene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
@@ -146,10 +157,13 @@ namespace OtterTutorial.Entities
                 }
 
                 direction = Global.DIR_UP;
-                sprite.Play("walkUp");
+                if (!isShooting)
+                {
+                    sprite.Play("walkUp");
+                }
                 sprite.FlippedX = false;
             }
-            else if (Global.PlayerSession.Controller.Down.Down)
+            else if (Global.PlayerSession.Controller.Button("down").Down)
             {
                 newY = Y + moveSpeed;
                 if (!checkScene.grid.GetRect(X, newY, X + WIDTH, newY + HEIGHT, false))
@@ -158,7 +172,10 @@ namespace OtterTutorial.Entities
                 }
 
                 direction = Global.DIR_DOWN;
-                sprite.Play("walkDown");
+                if (!isShooting)
+                {
+                    sprite.Play("walkDown");
+                }
                 sprite.FlippedX = false;
             }
             else
@@ -173,23 +190,34 @@ namespace OtterTutorial.Entities
             {
                 if (sprite.CurrentAnim.Equals("walkLeft"))
                 {
-                    sprite.Play("standLeft");
+                    if (!isShooting)
+                    {
+                        sprite.Play("standLeft");
+                    }
                 }
                 else if (sprite.CurrentAnim.Equals("walkRight"))
                 {
-                    sprite.Play("standRight");
+                    if (!isShooting)
+                    {
+                        sprite.Play("standRight");
+                    }
                 }
                 else if (sprite.CurrentAnim.Equals("walkDown"))
                 {
-                    sprite.Play("standDown");
+                    if (!isShooting)
+                    {
+                        sprite.Play("standDown");
+                    }
                 }
                 else if (sprite.CurrentAnim.Equals("walkUp"))
                 {
-                    sprite.Play("standUp");
+                    if (!isShooting)
+                    {
+                        sprite.Play("standUp");
+                    }
                 }
             }
-            // CHECK FOR WEAPON SHOOTAN
-            equippedWeapon.fire();
+
 
             // Add particles if the player is moving in any direction
             if (verticalMovement || horizontalMovement)
@@ -250,7 +278,7 @@ namespace OtterTutorial.Entities
                 if (i.attributes.ContainsKey("movementSpeed"))
                 {
                     //jb- arbitrary cap on movespeed 
-                    if (moveSpeed < 10)
+                    if (moveSpeed < 6)
                     {
                         moveSpeed = moveSpeed + (int)i.attributes["movementSpeed"];
                         Console.WriteLine("speed: " + moveSpeed);

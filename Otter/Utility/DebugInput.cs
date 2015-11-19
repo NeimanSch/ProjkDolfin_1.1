@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Otter {
+﻿namespace Otter {
     /// <summary>
     /// Class that is used for debug input. Wraps the Input class but only works when debug input
     /// is enabled.
@@ -87,6 +82,10 @@ namespace Otter {
             Game = game;
 
             Instance = this;
+
+#if DEBUG
+            Enabled = true;
+#endif
         }
 
         #endregion

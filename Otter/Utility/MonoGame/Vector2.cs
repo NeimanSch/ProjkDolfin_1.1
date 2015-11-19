@@ -26,9 +26,7 @@ SOFTWARE.
 #endregion License
 
 using System;
-using System.Text;
 using System.Globalization;
-using System.Runtime.Serialization;
 
 namespace Otter {
     /// <summary>
@@ -69,6 +67,10 @@ namespace Otter {
 
         public static Vector2 UnitY {
             get { return unitYVector; }
+        }
+
+        public static Vector2 MaxValue {
+            get { return new Vector2(float.MaxValue, float.MaxValue); }
         }
 
         #endregion Properties
@@ -424,7 +426,7 @@ namespace Otter {
         public override string ToString() {
             CultureInfo currentCulture = CultureInfo.CurrentCulture;
             return string.Format(currentCulture, "{{X:{0} Y:{1}}}", new object[] { 
-				this.X.ToString(currentCulture), this.Y.ToString(currentCulture) });
+                this.X.ToString(currentCulture), this.Y.ToString(currentCulture) });
         }
 
         #endregion Public Methods

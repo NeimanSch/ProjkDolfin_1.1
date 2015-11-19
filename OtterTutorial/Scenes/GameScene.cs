@@ -13,7 +13,7 @@ namespace OtterTutorial.Scenes
 {
     public class GameScene : Scene
     {
-        public Music gameMusic = new Music(Assets.MUSIC_GAME);
+        public Sound gameMusic = new Sound(Assets.MUSIC_GAME);
 
         // Our Tilemap's calculated width and height
         public const int WIDTH = Global.GAME_WIDTH * 8;
@@ -194,17 +194,30 @@ namespace OtterTutorial.Scenes
 
         public override void Update()
         {
-            if (Global.PlayerSession.Controller.Select.Pressed)
+            //need property for number of enemies in scene.
+            if (Global.player.score == 99)
+            {
+                //jb - testing win game scenario
+                Global.TUTORIAL.Scene.RemoveAll();
+                Global.TUTORIAL.SwitchScene(new EndScene());
+                //
+            }
+
+            if (Global.PlayerSession.Controller.Button("select").Pressed)
             {
                 if (!Global.paused)
                 {
                     Global.paused = true;
-                   // Game.PauseToggle();
+                    pauseText.X = playerStats.X;
+                    pauseText.Y = playerStats.Y;
+                    pauseText.Visible = true;
+                    // Game.PauseToggle();
                 }
                 else
                 {
                     Global.paused = false;
                     pauseMenu.remove();
+                    pauseText.Visible = false;
                     //countRendering = false;
                 }
                 return;
@@ -213,7 +226,7 @@ namespace OtterTutorial.Scenes
             {
                 DrawPauseMenu();
                 pauseMenu.remove();
-                
+
                 return;
             }
             else if (!Global.paused)

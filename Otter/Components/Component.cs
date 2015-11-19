@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 namespace Otter {
     /// <summary>
     /// Base Component class.  Components can be added to Entities.
@@ -30,6 +26,55 @@ namespace Otter {
         /// How long the Component has been alive (added to an Entity and updated.)
         /// </summary>
         public float Timer = 0;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// The Scene that the parent Entity is in.
+        /// </summary>
+        public Scene Scene {
+            get {
+                return Entity.Scene;
+            }
+        }
+
+        /// <summary>
+        /// The first Collider of the parent Entity.
+        /// </summary>
+        public Collider Collider {
+            get {
+                return Entity.Collider;
+            }
+        }
+
+        /// <summary>
+        /// The first Graphic of the parent Entity.
+        /// </summary>
+        public Graphic Graphic {
+            get {
+                return Entity.Graphic;
+            }
+        }
+
+        /// <summary>
+        /// The list of Graphics from the parent Entity.
+        /// </summary>
+        public List<Graphic> Graphics {
+            get {
+                return Entity.Graphics;
+            }
+        }
+
+        /// <summary>
+        /// The list of Colliders from the parent Entity.
+        /// </summary>
+        public List<Collider> Colliders {
+            get {
+                return Entity.Colliders;
+            }
+        }
 
         #endregion
 
@@ -86,6 +131,23 @@ namespace Otter {
 
         }
 
+        /// <summary>
+        /// Gets the first Component of type T from this Component's Entity.
+        /// </summary>
+        /// <typeparam name="T">The type of the Component.</typeparam>
+        /// <returns>The first Component of type T from the Entity's Components.</returns>
+        public T GetComponent<T>() where T : Component {
+            return Entity.GetComponent<T>();
+        }
+
+        /// <summary>
+        /// Gets a list of Components of type T from this Component's Entity.
+        /// </summary>
+        /// <typeparam name="T">The type of the Components.</typeparam>
+        /// <returns>A list of Components of type T from the Entity's Components.</returns>
+        public List<T> GetComponents<T>() where T : Component {
+            return Entity.GetComponents<T>();
+        }
         #endregion
 
     }

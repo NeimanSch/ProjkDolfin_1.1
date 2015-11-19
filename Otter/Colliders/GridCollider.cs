@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -111,6 +109,11 @@ namespace Otter {
             AddTag(tags);
         }
 
+        public GridCollider(int width, int height, int tileWidth, int tileHeight, Enum tag, params Enum[] tags) : this(width, height, tileWidth, tileHeight) {
+            AddTag(tag);
+            AddTag(tags);
+        }
+
         #endregion
 
         #region Public Methods
@@ -123,6 +126,7 @@ namespace Otter {
         /// <param name="collidable">True if collidable.</param>
         public void SetTile(int x, int y, bool collidable = true) {
             if (x < 0 || y < 0) return;
+            if (x >= TileColumns || y >= TileRows) return;
             collisions[Util.OneDee((int)TileColumns, (int)x, (int)y)] = collidable;
         }
 
@@ -160,6 +164,7 @@ namespace Otter {
         /// <returns>True if the tile is collidable.</returns>
         public bool GetTile(int x, int y) {
             if (x < 0 || y < 0) return false;
+            if (x >= TileColumns || y >= TileRows) return false;
             var index = Util.OneDee((int)TileColumns, (int)x, (int)y);
             if (index >= collisions.Count) return false;
             return collisions[index];
@@ -317,7 +322,7 @@ namespace Otter {
             for (int i = 0; i < TileColumns; i++) {
                 for (int j = 0; j < TileRows; j++) {
                     if (GetTile(i, j)) {
-                        Draw.Rectangle(Left + i * TileWidth, Top + j * TileHeight, TileWidth, TileHeight, Color.None, Color.Red, 1f);
+                        Draw.Rectangle(Left + i * TileWidth + 1, Top + j * TileHeight + 1, TileWidth - 2, TileHeight - 2, Color.None, Color.Red, 1f);
                     }
                 }
             }

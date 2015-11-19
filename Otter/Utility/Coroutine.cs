@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 // shout outs to Chevy Ray for this
@@ -107,8 +105,6 @@ namespace Otter
         /// Updates all the routines.  The coroutine in the Game automatically runs this.
         /// </summary>
         public void Update() {
-            Instance = this;
-
             for (int i = 0; i < routines.Count; i++) {
                 if (routines[i].Current is IEnumerator)
                     if (MoveNext((IEnumerator)routines[i].Current))
@@ -161,6 +157,35 @@ namespace Otter
             while (!events.Contains(id)) {
                 yield return 0;
             }
+        }
+
+        /// <summary>
+        /// Waits until a specific event has been published.
+        /// </summary>
+        /// <param name="id">The enum id of the event.</param>
+        /// <returns></returns>
+        public IEnumerator WaitForEvent(Enum id) {
+            while (!events.Contains(Util.EnumValueToString(id))) {
+                yield return 0;
+            }
+        }
+
+        /// <summary>
+        /// Check if an event has been published.
+        /// </summary>
+        /// <param name="id">The string id of the event.</param>
+        /// <returns>True if the event has been published.</returns>
+        public bool HasEvent(string id) {
+            return events.Contains(id);
+        }
+
+        /// <summary>
+        /// Check if an event has been published.
+        /// </summary>
+        /// <param name="id">The enum id of the event.</param>
+        /// <returns>True if the event has been published.</returns>
+        public bool HasEvent(Enum id) {
+            return events.Contains(Util.EnumValueToString(id));
         }
 
         /// <summary>

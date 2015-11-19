@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Otter {
@@ -43,8 +41,14 @@ namespace Otter {
 
         #region Public Fields
 
+        /// <summary>
+        /// An action to run when the animation finishes playing.
+        /// </summary>
         public Action OnComplete;
 
+        /// <summary>
+        /// Determines if the animation is active (playing.)
+        /// </summary>
         public bool Active;
 
         #endregion
@@ -249,7 +253,7 @@ namespace Otter {
         /// <summary>
         /// Updates the Anim object.  Handled by the Spritemap usually.  If this doesn't run the animation will not play.
         /// </summary>
-        /// <param name="t">The elapsed time.</param>
+        /// <param name="t">The time scale.</param>
         public void Update(float t = 1f) {
             if (Active) {
                 timer += PlaybackSpeed * Game.Instance.DeltaTime * t;

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
-using SFML.Graphics;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 namespace Otter {
     /// <summary>
@@ -170,7 +166,7 @@ namespace Otter {
         /// <param name="name">The name of the texture to test.</param>
         /// <returns>True if the atlas data contains a texture by the specified name.</returns>
         public bool Exists(string name) {
-            return GetTexture(name) != null;
+            return subtextures.ContainsKey(name);
         }
 
         #endregion

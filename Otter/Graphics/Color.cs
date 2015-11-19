@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace Otter {
@@ -70,6 +68,61 @@ namespace Otter {
             return new Color(r, g, b, a);
         }
 
+        /// <summary>
+        /// Store a custom Color.  Actually stores a new copy of that Color.
+        /// </summary>
+        /// <param name="color">The Color to store.</param>
+        /// <param name="name">The name of the Color.</param>
+        public static void AddCustom(Color color, Enum name) {
+            customColors.Add(Util.EnumValueToString(name), new Color(color));
+        }
+
+        /// <summary>
+        /// Store a custom Color.  Actually stores a new copy of that Color.
+        /// </summary>
+        /// <param name="color">The Color to store.</param>
+        /// <param name="name">The name of the Color.</param>
+        public static void AddCustom(string color, Enum name) {
+            AddCustom(new Color(color), name);
+        }
+
+        /// <summary>
+        /// Store a custom Color.  Actually stores a new copy of that Color.
+        /// </summary>
+        /// <param name="color">The Color to store.</param>
+        /// <param name="name">The name of the Color.</param>
+        public static void AddCustom(UInt32 color, Enum name) {
+            AddCustom(new Color(color), name);
+        }
+
+        /// <summary>
+        /// Get a stored custom Color.  Returns a new copy of it.
+        /// </summary>
+        /// <param name="name">The name of the Color stored.</param>
+        /// <returns>A new copy of the custom Color.</returns>
+        public static Color Custom(Enum name) {
+            return customColors[Util.EnumValueToString(name)].Copy();
+        }
+
+        /// <summary>
+        /// Create a shade of gray based on a value 0 to 1.
+        /// </summary>
+        /// <param name="rgb">The level of gray. 0 is black, 1 is white.</param>
+        /// <returns>A color of RGB equal to the value input for rgb.</returns>
+        public static Color Shade(float rgb) {
+            return new Color(rgb, rgb, rgb);
+        }
+
+        /// <summary>
+        /// Create a shade of gray based on a value 0 to 1.
+        /// </summary>
+        /// <param name="rgb">The level of gray. 0 is black, 1 is white.</param>
+        /// <param name="a">The alpha of the returned Color.</param>
+        /// <returns>A color of RGB equal to the value input for rgb with alpha a.</returns>
+        public static Color Shade(float rgb, float a) {
+            return new Color(rgb, rgb, rgb, a);
+        }
+
         #endregion
 
         #region Static Properties
@@ -133,6 +186,12 @@ namespace Otter {
         public static Color RandomAlpha {
             get { return Rand.ColorAlpha; }
         }
+
+        #endregion
+
+        #region Static Fields
+
+        static Dictionary<string, Color> customColors = new Dictionary<string, Color>();
 
         #endregion
 
@@ -319,7 +378,7 @@ namespace Otter {
         /// Create a new color from a hex number.  Formats are 0xRGB, 0xRRGGBB, 0xRGBA, 0xRRGGBBAA.
         /// </summary>
         /// <param name="hex">A hex number representing a color.</param>
-        public Color(UInt32 hex) : this(hex.ToString("X")) { }
+        public Color(UInt32 hex) : this(hex.ToString("X6")) { }
 
         /// <summary>
         /// Create a new color using bytes from 0 to 255.
@@ -344,12 +403,27 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Get a string of the Color.
+        /// Get a hex string of the Color.
         /// </summary>
         public string ColorString {
             get {
-                return ByteR.ToString("X") + ByteG.ToString("X") + ByteB.ToString("X") + ByteA.ToString("X");
+                return ByteR.ToString("X2") + ByteG.ToString("X2") + ByteB.ToString("X2") + ByteA.ToString("X2");
             }
+        }
+
+        public void SetColor(float r, float g, float b, float a) {
+            R = r;
+            G = g;
+            B = b;
+            A = a;
+        }
+
+        public void SetColor(float r, float g, float b) {
+            SetColor(r, g, b, A);
+        }
+
+        public void SetColor(Color color) {
+            SetColor(color.R, color.G, color.B, color.A);
         }
 
         #endregion
@@ -357,6 +431,7 @@ namespace Otter {
         #region Operators
 
         public static Color operator *(Color value1, Color value2) {
+            value1 = new Color(value1); // Make new color otherwise this doesn't work properly.
             value1.R *= value2.R;
             value1.G *= value2.G;
             value1.B *= value2.B;
@@ -365,6 +440,7 @@ namespace Otter {
         }
 
         public static Color operator *(Color value1, float value2) {
+            value1 = new Color(value1); 
             value1.R *= value2;
             value1.G *= value2;
             value1.B *= value2;
@@ -372,6 +448,7 @@ namespace Otter {
         }
 
         public static Color operator +(Color value1, Color value2) {
+            value1 = new Color(value1); 
             value1.R += value2.R;
             value1.G += value2.G;
             value1.B += value2.B;
@@ -380,6 +457,7 @@ namespace Otter {
         }
 
         public static Color operator -(Color value1, Color value2) {
+            value1 = new Color(value1); 
             value1.R -= value2.R;
             value1.G -= value2.G;
             value1.B -= value2.B;
@@ -388,6 +466,7 @@ namespace Otter {
         }
 
         public static Color operator /(Color value1, Color value2) {
+            value1 = new Color(value1); 
             value1.R /= value2.R;
             value1.G /= value2.G;
             value1.B /= value2.B;

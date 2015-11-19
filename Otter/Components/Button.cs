@@ -1,8 +1,5 @@
-﻿using System;
+﻿using SFML.Window;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SFML.Window;
 
 namespace Otter {
     /// <summary>
@@ -30,7 +27,7 @@ namespace Otter {
         /// <summary>
         /// The joystick Buttons registered to the Button.
         /// </summary>
-        public List<List<int>> Buttons = new List<List<int>>();
+        public List<List<int>> JoyButtons = new List<List<int>>();
 
         /// <summary>
         /// The mouse buttons registered to the Button.
@@ -48,9 +45,14 @@ namespace Otter {
         public bool Enabled = true;
 
         /// <summary>
-        /// The name of the Button.  Mostly used by the Controller class.
+        /// The time passed since the last button press.
         /// </summary>
-        public string Name = "";
+        public float LastPressed = 0;
+
+        /// <summary>
+        /// The time passed since the last button release.
+        /// </summary>
+        public float LastReleased = 0;
 
         #endregion
 
@@ -113,11 +115,18 @@ namespace Otter {
         /// Create a Button.
         /// </summary>
         /// <param name="name">Optional string name of the button.</param>
-        public Button(string name = "") {
+        public Button() {
             for (var i = 0; i < Joystick.Count; i++) {
-                Buttons.Add(new List<int>());
+                JoyButtons.Add(new List<int>());
             }
-            Name = name;
+        }
+
+        /// <summary>
+        /// Create a Button by copying another existing Button.
+        /// </summary>
+        /// <param name="source">The Button to copy.</param>
+        public Button(Button source) : this() {
+            AddButton(source);
         }
 
         #endregion
@@ -125,7 +134,7 @@ namespace Otter {
         #region Public Methods
 
         /// <summary>
-        /// Add a keyboard key to the Button.
+        /// Add a keyboard Key to the Button.
         /// </summary>
         /// <param name="keys">The key to add.</param>
         /// <returns>The Button.</returns>
@@ -163,9 +172,25 @@ namespace Otter {
         /// </summary>
         /// <param name="button">The joystick button to add.</param>
         /// <param name="joystick">The joystick id of the button to add.</param>
-        /// <returns></returns>
-        public Button AddButton(int button, int joystick = 0) {
-            Buttons[joystick].Add(button);
+        /// <returns>The Button.</returns>
+        public Button AddJoyButton(int button, int joystick = 0) {
+            JoyButtons[joystick].Add(button);
+            return this;
+        }
+
+        /// <summary>
+        /// Add another Button into this Button.
+        /// </summary>
+        /// <param name="source">The Button to add into this Button.</param>
+        /// <returns>The Button.</returns>
+        public Button AddButton(Button source) {
+            Keys.AddRange(source.Keys);
+            JoyButtons.EachWithIndex((b, i) => {
+                JoyButtons[i].AddRange(source.JoyButtons[i]);
+            });
+            MouseButtons.AddRange(source.MouseButtons);
+            MouseWheel.AddRange(source.MouseWheel);
+
             return this;
         }
 
@@ -174,9 +199,9 @@ namespace Otter {
         /// </summary>
         /// <param name="button">The AxisButton to add.</param>
         /// <param name="joystick">The joystick id of the button to add.</param>
-        /// <returns></returns>
+        /// <returns>The Button.</returns>
         public Button AddAxisButton(AxisButton button, int joystick = 0) {
-            AddButton((int)button, joystick);
+            AddJoyButton((int)button, joystick);
             return this;
         }
 
@@ -210,8 +235,8 @@ namespace Otter {
                 }
             }
 
-            for (int i = 0; i < Buttons.Count; i++) {
-                foreach (var button in Buttons[i]) {
+            for (int i = 0; i < JoyButtons.Count; i++) {
+                foreach (var button in JoyButtons[i]) {
                     if (Input.Instance.ButtonDown(button, i)) {
                         buttonsDown = true;
                     }
@@ -245,6 +270,15 @@ namespace Otter {
             prevButtonsDown = currentButtonsDown;
             currentButtonsDown = buttonsDown;
 
+            LastPressed += Game.Instance.DeltaTime;
+            if (Pressed) {
+                LastPressed = 0;
+            }
+
+            LastReleased += Game.Instance.DeltaTime;
+            if (Released) {
+                LastReleased = 0;
+            }
         }
 
         #endregion

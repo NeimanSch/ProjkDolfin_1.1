@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using System.IO;
 using System.Reflection;
+using System.Xml;
 
 namespace Otter {
     /// <summary>
@@ -17,6 +15,8 @@ namespace Otter {
         #region Private Fields
 
         Dictionary<string, int> ColliderTags = new Dictionary<string, int>();
+        Dictionary<string, string> valueTypes = new Dictionary<string, string>();
+        Dictionary<string, string> assetMappings = new Dictionary<string, string>();
 
         #endregion
 
@@ -68,6 +68,11 @@ namespace Otter {
         public Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
 
         /// <summary>
+        /// The name of the method to use for creating Entities when loading an .oel file into a Scene.
+        /// </summary>
+        public string CreationMethodName = "CreateFromXml";
+
+        /// <summary>
         /// The drawing layer to place the first loaded tile map on.
         /// </summary>
         public int BaseTileDepth;
@@ -77,6 +82,15 @@ namespace Otter {
         /// tilemap will be at Layer 0, the second at Layer 100, the third at Layer 200, etc.
         /// </summary>
         public int TileDepthIncrement = 100;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// The level data last loaded with LoadLevel()
+        /// </summary>
+        public string CurrentLevel { get; private set; }
 
         #endregion
 
@@ -117,6 +131,11 @@ namespace Otter {
             foreach (XmlElement x in xmlTilesets) {
                 TileMaps.Add(x["Name"].InnerText, x["FilePath"].InnerText);
             }
+
+            var xmlLevelValues = xmlDoc.GetElementsByTagName("ValueDefinition");
+            foreach (XmlElement x in xmlLevelValues) {
+                valueTypes.Add(x.Attributes["Name"].Value, x.Attributes["xsi:type"].Value);
+            }
         }
 
         #endregion
@@ -131,9 +150,25 @@ namespace Otter {
             arguments[1] = e.Attributes;
 
             if (entityType != null) {
-                MethodInfo method = entityType.GetMethod("CreateFromXML", BindingFlags.Static | BindingFlags.Public);
+                MethodInfo method = entityType.GetMethod(CreationMethodName, BindingFlags.Static | BindingFlags.Public);
                 if (method != null) {
                     method.Invoke(null, arguments);
+                }
+                else {
+                    // Attempt to create with just constructor
+                    var x = e.AttributeInt("x");
+                    var y = e.AttributeInt("y");
+                    Entity entity = null;
+                    if (entityType.GetConstructor(new Type[] { typeof(int), typeof(int) }) != null) {
+                        entity = (Entity)Activator.CreateInstance(entityType, x, y);
+                    }
+                    else if (entityType.GetConstructor(new Type[] { typeof(int), typeof(int), typeof(OgmoData) }) != null) {
+                        entity = (Entity)Activator.CreateInstance(entityType, x, y, new OgmoData(e.Attributes));
+                    }
+                    if (entity != null) {
+                        scene.Add(entity);
+                    }
+                   
                 }
             }
         }
@@ -143,15 +178,81 @@ namespace Otter {
         #region Public Methods
 
         /// <summary>
-        /// Load data into a scene from a source .oel file.
+        /// Assign a replacement asset for a Tilemap when LoadLevel is called.
         /// </summary>
-        /// <param name="source">The oel to load.</param>
-        /// <param name="scene">The scene to load into.</param>
-        public void LoadLevel(string source, Scene scene) {
-            Entities.Clear();
+        /// <param name="searchPath">The asset path to find (searches at the end of the string!)</param>
+        /// <param name="replacement">The full path to replace the matching asset with.</param>
+        public void RemapAsset(string searchPath, string replacement) {
+            assetMappings.Add(searchPath, replacement);
+        }
+
+        /// <summary>
+        /// Get a value from an Ogmo level.
+        /// </summary>
+        /// <typeparam name="T">The type of value.</typeparam>
+        /// <param name="name">The name of the value.</param>
+        /// <param name="data">The level data to use.  If left blank will use the CurrentLevel.</param>
+        /// <returns>The value cast to type T.</returns>
+        public T GetValue<T>(string name, string data = "") {
+            if (data == "") {
+                data = CurrentLevel;
+            }
 
             var xmlDoc = new XmlDocument();
-            xmlDoc.Load(source);
+            xmlDoc.LoadXml(data);
+
+            var xmlLevel = xmlDoc["level"];
+
+            var value = xmlLevel.Attributes[name].Value;
+
+            if (typeof(T) == typeof(Color)) {
+                return (T)Activator.CreateInstance(typeof(T), value.Substring(1, 6));
+            }
+            else {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+        }
+
+        /// <summary>
+        /// Get a value from an Ogmo level.
+        /// </summary>
+        /// <typeparam name="T">The type of value.</typeparam>
+        /// <param name="name">The name of the value.</param>
+        /// <param name="source">The level data to use.  If left blank will use the CurrentLevel.</param>
+        /// <returns>The value cast to type T.</returns>
+        public T GetValue<T>(Enum name, string source = "") {
+            return GetValue<T>(Util.EnumValueToBasicString(name), source);
+        }
+
+        public T GetValueFromFile<T>(string name, string path) {
+            return (T)GetValue<T>(name, File.ReadAllText(path));
+        }
+
+        public string GetLayerData(string name, string data = "") {
+            if (data == "") {
+                data = CurrentLevel;
+            }
+
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(data);
+
+            var xmlLevel = xmlDoc["level"];
+
+            return xmlLevel[name].InnerText;
+        }
+
+        /// <summary>
+        /// Load level data from a string into a Scene.
+        /// </summary>
+        /// <param name="data">The level data to load.</param>
+        /// <param name="scene">The Scene to load into.</param>
+        public void LoadLevel(string data, Scene scene) {
+            Entities.Clear();
+
+            CurrentLevel = data;
+
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(data);
 
             var xmlLevel = xmlDoc["level"];
 
@@ -161,7 +262,6 @@ namespace Otter {
             int i = 0;
 
             foreach (var layer in Layers.Values) {
-
                 if (layer.Type == "GridLayerDefinition") {
                     var Entity = new Entity();
 
@@ -190,10 +290,30 @@ namespace Otter {
 
                     var tileset = xmlTiles.Attributes["tileset"].Value;
 
-                    var tilemap = new Tilemap(ImagePath + TileMaps[tileset], scene.Width, scene.Height, layer.GridWidth, layer.GridHeight);
+                    var tilepath = ImagePath + TileMaps[tileset];
 
-                    foreach (XmlElement t in xmlTiles) {
-                        tilemap.SetTile(t);
+                    foreach(var kv in assetMappings) {
+                        var find = kv.Key;
+                        var replace = kv.Value;
+
+                        if (tilepath.EndsWith(find)) {
+                            tilepath = replace;
+                            break;
+                        }
+                    }
+
+                    var tilemap = new Tilemap(tilepath, scene.Width, scene.Height, layer.GridWidth, layer.GridHeight);
+
+                    var exportMode = xmlTiles.Attributes["exportMode"].Value;
+                    switch (exportMode) {
+                        case "CSV":
+                            tilemap.LoadCSV(xmlTiles.InnerText);
+                            break;
+                        case "XMLCoords":
+                            foreach (XmlElement t in xmlTiles) {
+                                tilemap.SetTile(t);
+                            }
+                            break;
                     }
 
                     tilemap.Update();
@@ -209,8 +329,10 @@ namespace Otter {
                 if (layer.Type == "EntityLayerDefinition") {
                     var xmlEntities = xmlLevel[layer.Name];
 
-                    foreach (XmlElement e in xmlEntities) {
-                        CreateEntity(e, scene);
+                    if (xmlEntities != null) {
+                        foreach (XmlElement e in xmlEntities) {
+                            CreateEntity(e, scene);
+                        }
                     }
                 }
 
@@ -223,12 +345,30 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Load data into a Scene from a source .oel file.
+        /// </summary>
+        /// <param name="path">The oel to load.</param>
+        /// <param name="scene">The Scene to load into.</param>
+        public void LoadLevelFromFile(string path, Scene scene) {
+            LoadLevel(File.ReadAllText(path), scene);
+        }
+
+        /// <summary>
         /// Register a collision tag on a grid layer loaded from the oel file.
         /// </summary>
         /// <param name="tag">The tag to use.</param>
         /// <param name="layerName">The layer name that should use the tag.</param>
         public void RegisterTag(int tag, string layerName) {
             ColliderTags.Add(layerName, tag);
+        }
+
+        /// <summary>
+        /// Register a collision tag on a grid layer loaded from the oel file.
+        /// </summary>
+        /// <param name="tag">The enum tag to use. (Casts to int!)</param>
+        /// <param name="layerName">The layer name that should use the tag.</param>
+        public void RegisterTag(Enum tag, string layerName) {
+            RegisterTag(Convert.ToInt32(tag), layerName);
         }
 
         /// <summary>
@@ -340,5 +480,33 @@ namespace Otter {
 
         #endregion
 
+    }
+
+    /// <summary>
+    /// A simple data class that just extends Dictionary.
+    /// </summary>
+    public class OgmoData : Dictionary<string, string> {
+
+        public OgmoData(XmlAttributeCollection attributes) {
+            foreach (XmlAttribute attr in attributes) {
+                Add(attr.Name, attr.Value);
+            }
+        }
+
+        public int GetInt(string key, int onNull) {
+            return this.ValueAsInt(key, onNull);
+        }
+
+        public bool GetBool(string key, bool onNull) {
+            return this.ValueAsBool(key, onNull);
+        }
+
+        public float GetFloat(string key, float onNull) {
+            return this.ValueAsFloat(key, onNull);
+        }
+
+        public Color GetColor(string key, Color onNull) {
+            return this.ValueAsColor(key, onNull);
+        }
     }
 }

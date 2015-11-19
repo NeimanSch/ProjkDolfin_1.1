@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
     /// Movement Component that adds platforming movement behavior to an Entity.  This is built for
-    /// fixed framerate applications.
+    /// fixed framerate applications.  Make sure you have the Axis, JumpButton, and Collider assigned
+    /// before using it!  If you want to use jump through platforms, you'll also need to use the
+    /// JumpThroughCollider, which should be a 1 pixel tall collider at the bottom of your Entity.
     /// </summary>
     public class PlatformingMovement : Movement {
 
@@ -128,6 +128,8 @@ namespace Otter {
         /// </summary>
         public Action OnJump;
 
+        public Collider JumpThroughCollider;
+
         /// <summary>
         /// The dictionary of acceleration values.
         /// </summary>
@@ -137,6 +139,11 @@ namespace Otter {
         /// The default acceleration value to use if none are set.
         /// </summary>
         public static int DefaultAccleration = 150;
+
+        /// <summary>
+        /// Determines if holding Down while pushing Jump will cause the Entity to drop through jump through platforms instead of jumping.
+        /// </summary>
+        public bool DownJumpDrop = true;
 
         #endregion
 
@@ -166,6 +173,11 @@ namespace Otter {
         /// True for one update after the object has jumped.
         /// </summary>
         public bool JustJumped { get; private set; }
+
+        /// <summary>
+        /// The list of tags to treat as jump through platforms.
+        /// </summary>
+        public List<int> CollisionsJumpThrough { get; private set; }
 
         /// <summary>
         /// The total X speed.
@@ -210,11 +222,13 @@ namespace Otter {
             Speeds.Add(Speed);
             Speeds.Add(ExtraSpeed);
 
-            TargetSpeed = new Speed(xSpeedMax, ySpeedMax);
+            TargetSpeed = new Speed(int.MaxValue, int.MaxValue);
 
             Gravity = gravity;
 
             JustJumped = false;
+
+            CollisionsJumpThrough = new List<int>();
 
             Acceleration.Add(AccelType.Ground, DefaultAccleration);
             Acceleration.Add(AccelType.Air, DefaultAccleration / 4);
@@ -225,17 +239,47 @@ namespace Otter {
         #region Public Methods
 
         /// <summary>
+        /// Register a collision tag to treat as jump through platforms.
+        /// </summary>
+        /// <param name="tags">Tags to register.</param>
+        public void AddJumpThrough(params int[] tags) {
+            foreach (var t in tags) {
+                CollisionsJumpThrough.Add(t);
+            }
+        }
+
+        /// <summary>
+        /// Register a collision tag to treat as jump through platforms.
+        /// </summary>
+        /// <param name="tags">Tags to register.</param>
+        public void AddJumpThrough(params Enum[] tags) {
+            AddJumpThrough(Util.EnumToIntArray(tags));
+        }
+
+        /// <summary>
         /// Updates the movement.
         /// </summary>
         public override void Update() {
             base.Update();
 
+            if (Entity == null) return;
+
             JustJumped = false;
 
-            OnGround = Collider.Collide(Entity.X, Entity.Y + 1, CollidesWith) != null;
-            AgainstWallLeft = Collider.Collide(Entity.X - 1, Entity.Y, CollidesWith) != null;
-            AgainstWallRight = Collider.Collide(Entity.X + 1, Entity.Y, CollidesWith) != null;
-            AgainstCeiling = Collider.Collide(Entity.X, Entity.Y - 1, CollidesWith) != null;
+            OnGround = Collider.Collide(Entity.X, Entity.Y + 1, CollisionsSolid) != null;
+            if (!OnGround && JumpThroughCollider != null) {
+                // Check for a jump through platform too
+                
+                OnGround = JumpThroughCollider.Overlap(Entity.X, Entity.Y + 1, CollisionsJumpThrough);
+                if (OnGround) {
+                    var platformCollider = JumpThroughCollider.Collide(Entity.X, Entity.Y + 1, CollisionsJumpThrough);
+                    OnGround = !JumpThroughCollider.Overlap(Entity.X, Entity.Y, platformCollider);
+                }
+            }
+
+            AgainstWallLeft = Collider.Collide(Entity.X - 1, Entity.Y, CollisionsSolid) != null;
+            AgainstWallRight = Collider.Collide(Entity.X + 1, Entity.Y, CollisionsSolid) != null;
+            AgainstCeiling = Collider.Collide(Entity.X, Entity.Y - 1, CollisionsSolid) != null;
 
             if (OnGround) {
                 HasJumped = false;
@@ -250,7 +294,23 @@ namespace Otter {
             jumpBuffer = (int)Util.Approach(jumpBuffer, 0, 1);
             if (JumpEnabled) {
                 if (JumpButton.Pressed) {
-                    jumpBuffer = JumpBufferMax;
+                    if (DownJumpDrop && JumpThroughCollider != null) { // Drop through platforms with Down + Jump
+                        var jumping = true;
+                        if (Axis.Y > 0.5f) {
+                            if (!Collider.Overlap(Entity.X, Entity.Y + 1, CollisionsSolid)) {
+                                if (JumpThroughCollider.Overlap(Entity.X, Entity.Y + 1, CollisionsJumpThrough)) {
+                                    Entity.Y += 1;
+                                    jumping = false;
+                                }
+                            }
+                        }
+                        if (jumping) {
+                            jumpBuffer = JumpBufferMax;
+                        }
+                    }
+                    else {
+                        jumpBuffer = JumpBufferMax;
+                    }
                 }
                 if (JumpButton.Up) {
                     jumpBuffer = 0;
@@ -293,7 +353,7 @@ namespace Otter {
             }
 
             if (UseAxis) {
-                TargetSpeed.X = Axis.X * TargetSpeed.MaxX;
+                TargetSpeed.X = Axis.X * Speed.MaxX;
 
                 Speed.X = Util.Approach(Speed.X, TargetSpeed.X, CurrentAccel);
 
@@ -324,6 +384,64 @@ namespace Otter {
             if (SumSpeedY > 0) OnGround = true;
             Speed.Y = 0;
             ExtraSpeed.Y = 0;
+        }
+
+        public override void MoveY(int speed, Collider collider = null) {
+            MoveBufferY += speed;
+
+            while (Math.Abs(MoveBufferY) >= SpeedScale) {
+                int move = Math.Sign(MoveBufferY);
+                if (collider != null) {
+                    bool freeToMove = true;
+                    Collider c = null;
+
+                    if (move > 0) {
+                        c = collider.Collide(Entity.X, Entity.Y + move, CollisionsSolid);
+                        if (c == null) {
+                            if (JumpThroughCollider != null) {
+                                var hasPlatformBelow = JumpThroughCollider.Overlap(Entity.X, Entity.Y + move, CollisionsJumpThrough);
+                                if (hasPlatformBelow) {
+                                    hasPlatformBelow = false;
+
+                                    // Check to see if only bottom 1 pixel is overlapping jump throughs
+                                    var platform = JumpThroughCollider.Collide(Entity.X, Entity.Y + move, CollisionsJumpThrough);
+                                    if (!JumpThroughCollider.Overlap(Entity.X, Entity.Y, platform)) {
+                                        // This makes sense just trust me ok
+                                        hasPlatformBelow = true;
+                                    }
+                                }
+
+                                if (hasPlatformBelow) {
+                                    freeToMove = false;
+                                    c = JumpThroughCollider.Collide(Entity.X, Entity.Y + move, CollisionsJumpThrough);
+                                }
+                            }
+                        }
+                        else {
+                            freeToMove = false;
+                        }
+                    }
+                    else {
+                        c = collider.Collide(Entity.X, Entity.Y + move, CollisionsSolid);
+                        if (c != null) {
+                            freeToMove = false;
+                        }
+                    }
+
+                    if (freeToMove) {
+                        Entity.Y += move;
+                        MoveBufferY = (int)Util.Approach(MoveBufferY, 0, SpeedScale);
+                    }
+                    else {
+                        MoveBufferY = 0;
+                        MoveCollideY(c);
+                    }
+                }
+                if (collider == null || CollisionsSolid.Count == 0) {
+                    Entity.Y += move;
+                    MoveBufferY = (int)Util.Approach(MoveBufferY, 0, SpeedScale);
+                }
+            }
         }
 
         #endregion

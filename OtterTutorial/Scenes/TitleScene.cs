@@ -36,7 +36,7 @@ namespace OtterTutorial.Scenes
             // Otter utilizes the C# Tweening library called Glide
             // More info can be found here: http://www.reddit.com/r/gamedev/comments/1fabdh/
             // Below, we tween the titleImage to its new Y position, in .30 seconds. Our Easing function utilized is Ease.BackOut
-            Glide.GlideManagerImpl.Tweener.Tween(titleImage, new { Y = 250 }, 30f, 0f).Ease(Ease.BackOut);
+            Tweener.Tween(titleImage, new { Y = 250 }, 30f, 0f).Ease(Ease.BackOut);
 
             // Set the text's outline color to the 
             // hex color #7FA8D2 (Otter2d.com Blue)
@@ -71,12 +71,12 @@ namespace OtterTutorial.Scenes
                 blinkTimer = 0;
             }
 
-            if (Global.PlayerSession.Controller.Start.Pressed)
+            if (Global.PlayerSession.Controller.Button("start").Pressed)
             {
                 // Before we jumped right to the GameScene. Now we fade the TitleScene out
-                if (Global.PlayerSession.Controller.Start.Pressed)
+                if (Global.PlayerSession.Controller.Button("start").Pressed)
                 {
-                    Glide.GlideManagerImpl.Tweener.Tween(darkScreen, new { Alpha = 1 }, 30f, 0).OnComplete(PlayGame);
+                    Tweener.Tween(darkScreen, new { Alpha = 1 }, 30f, 0).OnComplete(PlayGame);
                 }
             }
         }

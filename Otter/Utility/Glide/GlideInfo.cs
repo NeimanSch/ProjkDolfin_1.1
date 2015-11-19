@@ -1,84 +1,127 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Otter {
     internal class GlideInfo {
-        private FieldInfo field;
-        private PropertyInfo prop;
-        private TypeCode typeCode;
+        static GlideInfo() {
+            numericTypes = new Type[] {
+                typeof(Int16),
+                typeof(Int32),
+                typeof(Int64),
+                typeof(UInt16),
+                typeof(UInt32),
+                typeof(UInt64),
+                typeof(Single),
+                typeof(Double)
+            };
 
-        private object obj;
-
-        public string Name { get; private set; }
-        public float Value {
-            get {
-                if (field != null) {
-                    return Convert.ToSingle(field.GetValue(obj));
-                }
-                else {
-                    return Convert.ToSingle(prop.GetValue(obj, null));
-                }
-
-            }
-
-            set {
-                if (field != null) {
-                    field.SetValue(obj, Convert.ChangeType(value, typeCode));
-                }
-                else {
-                    prop.SetValue(obj, Convert.ChangeType(value, typeCode), null);
-                }
-            }
-        }
-
-        public GlideInfo(object obj, string property, bool writeRequired = true) {
-            this.obj = obj;
-            Name = property;
-
-            var type = obj.GetType();
-
-            BindingFlags flags =
+            flags =
                 BindingFlags.Public |
                 BindingFlags.NonPublic |
                 BindingFlags.Instance |
                 BindingFlags.Static;
-
-            if ((field = type.GetField(property, flags)) != null)	//	Using a field
-			{
-                typeCode = Type.GetTypeCode(field.GetValue(obj).GetType());
-            }
-            else if ((prop = type.GetProperty(property, flags)) != null)	//	Using a property
-			{
-                if (!prop.CanRead) {
-                    throw new Exception(string.Format("Property '{0}' on object of type {1} has no setter accessor.", prop, type.FullName));
-                }
-
-                if (!prop.CanWrite && writeRequired) {
-                    throw new Exception(string.Format("Property '{0}' on object of type {1} has no getter accessor.", prop, type.FullName));
-                }
-
-                typeCode = Type.GetTypeCode(prop.GetValue(obj, null).GetType());
-            }
-            else {
-                //	Couldn't find either
-                throw new Exception(string.Format("Field or property '{0}' not found on object of type {1}.", property, type.FullName));
-            }
-
-            CheckTypeCode(property);
         }
 
-        private void CheckTypeCode(string property) {
-            if (!(typeCode == TypeCode.Int16 ||
-            typeCode == TypeCode.Int32 ||
-            typeCode == TypeCode.Int64 ||
-            typeCode == TypeCode.UInt16 ||
-            typeCode == TypeCode.UInt32 ||
-            typeCode == TypeCode.UInt64 ||
-            typeCode == TypeCode.Single ||
-            typeCode == TypeCode.Double)) {
-                throw new InvalidCastException(string.Format("Property or field to tween must be numeric ({0} on {1}.", property, obj.GetType().Name));
+        private static Type[] numericTypes;
+        private static BindingFlags flags;
+
+        private FieldInfo field;
+        private PropertyInfo prop;
+        private bool isNumeric;
+
+        private object Target;
+
+        public string Name { get; private set; }
+
+        public object Value {
+            get { return field != null ? field.GetValue(Target) : prop.GetValue(Target, null); }
+            set {
+
+                if (isNumeric) {
+                    Type type = null;
+                    if (field != null) type = field.FieldType;
+                    if (prop != null) type = prop.PropertyType;
+                    if (AnyEquals(type, numericTypes))
+                        value = Convert.ChangeType(value, Type.GetTypeCode(type));
+                }
+
+                if (field != null)
+                    field.SetValue(Target, value);
+                else
+                    prop.SetValue(Target, value, null);
             }
+        }
+
+        public GlideInfo(object Target, string property, bool writeRequired = true) {
+            this.Target = Target;
+            Name = property;
+
+            Type targetType = null;
+            if (IsType(Target)) {
+                targetType = (Type)Target;
+            }
+            else {
+                targetType = Target.GetType();
+            }
+
+            field = targetType.GetField(property, flags);
+            prop = targetType.GetProperty(property, flags);
+
+            if (field == null) {
+                if (prop == null) {
+                    //	Couldn't find either
+                    throw new Exception(string.Format("Field or property '{0}' not found on object of type {1}.", property, targetType.FullName));
+                }
+                else {
+                    if (!prop.CanRead) {
+                        throw new Exception(string.Format("Property '{0}' on object of type {1} has no setter accessor.", prop, targetType.FullName));
+                    }
+
+                    if (!prop.CanWrite && writeRequired) {
+                        throw new Exception(string.Format("Property '{0}' on object of type {1} has no getter accessor.", prop, targetType.FullName));
+                    }
+                }
+            }
+
+            var valueType = Value.GetType();
+            isNumeric = AnyEquals(valueType, numericTypes);
+            CheckPropertyType(valueType, property, targetType.Name);
+        }
+
+        bool IsType(object target) {
+            var type = target.GetType();
+            var baseType = typeof(Type);
+
+            if (type == baseType)
+                return true;
+
+            var rootType = typeof(object);
+
+            while (type != null && type != rootType) {
+                var current = type.IsGenericType && baseType.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
+                if (baseType == current)
+                    return true;
+                type = type.BaseType;
+            }
+
+            return false;
+        }
+
+        private void CheckPropertyType(Type type, string prop, string targetTypeName) {
+            if (!ValidatePropertyType(type)) {
+                throw new InvalidCastException(string.Format("Property is invalid: ({0} on {1}).", prop, targetTypeName));
+            }
+        }
+
+        protected virtual bool ValidatePropertyType(Type type) {
+            return isNumeric;
+        }
+
+        static bool AnyEquals<T>(T value, params T[] options) {
+            foreach (var option in options)
+                if (value.Equals(option)) return true;
+
+            return false;
         }
     }
 }

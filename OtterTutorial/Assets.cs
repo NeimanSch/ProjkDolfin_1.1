@@ -17,11 +17,14 @@ namespace OtterTutorial
         public const string MUSIC_GAME = "../../Assets/Music/game.ogg";
 
         public const string PLAYER = "../../Assets/Graphics/player4.png";
-        public const string PLAYER2 = "../../Assets/Graphics/gun-test.png";
+        public const string PLAYER2 = "../../Assets/Graphics/another_new.png";
+
+        public const string MELEE_WEAPON = "../../Assets/Graphics/sword.png";
+
         public const string PLAYER_EXPLOSION = "../../Assets/Graphics/explosion.png";
         public const string PLAYER_PARTICLE = "../../Assets/Graphics/particle.png";
-        public const string BULLET = "../../Assets/Graphics/bullet.png";
-        public const string ENEMY_BULLET = "../../Assets/Graphics/enemy-bullet.png";
+        public const string BULLET = "../../Assets/Graphics/bullet1.png";
+        public const string ENEMY_BULLET = "../../Assets/Graphics/bullet2.png";
 
         public const string SND_BULLET_SHOOT = "../../Assets/Sound/gun-test.ogg";
         public const string SND_BULLET_EXPLODE = "../../Assets/Sound/bulletExplode.ogg";
@@ -33,7 +36,7 @@ namespace OtterTutorial
 
         public const string ENEMY_SPRITE = "../../Assets/Graphics/enemy.png";
 
-        public const string TILESET = "../../Assets/Graphics/tilesetv2.png";
+        public const string TILESET = "../../Assets/Graphics/tilesetv3.png";
         public const string MAP_WORLD = "../../Assets/Levels/tiles.csv";
         public const string MAP_SOLID = "../../Assets/Levels/solids.csv";
 

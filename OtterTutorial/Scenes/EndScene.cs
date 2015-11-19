@@ -16,7 +16,8 @@ namespace OtterTutorial.Scenes
         public const float TIMER_BLINK = 25f;
         public float blinkTimer = 0;
 
-        public Music endMusic = new Music(Assets.MUSIC_END, true);
+        public Sound endMusic = new Sound(Assets.MUSIC_END, true);
+
 
         public EndScene()
         {
@@ -40,7 +41,7 @@ namespace OtterTutorial.Scenes
             endImage.Y = 1000;
             this.AddGraphic(endImage);
 
-            Glide.GlideManagerImpl.Tweener.Tween(endImage, new { Y = 245 }, 30f, 0f).Ease(Ease.BackOut);
+            //Glide.GlideManagerImpl.Tweener.Tween(endImage, new { Y = 245 }, 30f, 0f).Ease(Ease.BackOut);
 
             endText.OutlineThickness = 3;
             endText.CenterOrigin();
@@ -75,12 +76,16 @@ namespace OtterTutorial.Scenes
                 blinkTimer = 0;
             }
 
-            if (Global.PlayerSession.Controller.Start.Pressed)
+            
+            if (Global.PlayerSession.Controller.Button("start").Pressed)
             {
-                endMusic.Stop();
+                
 
+                Console.WriteLine("scenes: " + Global.TUTORIAL.Scenes.Count);
                 // Go back to the TitleScene if the player hits Enter
                 Global.TUTORIAL.RemoveScene();
+                endMusic = null;
+                
                 Global.TUTORIAL.AddScene(new TitleScene());
             }
         }

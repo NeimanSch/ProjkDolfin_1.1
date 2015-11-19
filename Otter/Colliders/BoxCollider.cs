@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Otter {
     /// <summary>
     /// Rectangle Collider.
@@ -23,6 +19,11 @@ namespace Otter {
             AddTag(tags);
         }
 
+        public BoxCollider(int width, int height, Enum tag, params Enum[] tags) : this(width, height) {
+            AddTag(tag);
+            AddTag(tags);
+        }
+
         #endregion
 
         #region Public Methods
@@ -35,7 +36,12 @@ namespace Otter {
 
             if (Entity == null) return;
 
-            Draw.Rectangle(Left + 1, Top + 1, Width - 2, Height - 2, Color.None, Color.Red, 1f);
+            if (Width <= 2 || Height <= 2) {
+                Draw.Rectangle(Left, Top, Width, Height, Color.Red);
+            }
+            else {
+                Draw.Rectangle(Left + 1, Top + 1, Width - 2, Height - 2, Color.None, Color.Red, 1f);
+            }
         }
 
         #endregion

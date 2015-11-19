@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -37,44 +35,72 @@ namespace Otter {
         float finalSpeedX;
         bool hasFinalSpeedX;
 
+        float initSpeedX;
+
         float finalSpeedY;
         bool hasFinalSpeedY;
+
+        float initSpeedY;
 
         float finalScaleX;
         bool hasFinalScaleX;
 
+        float initScaleX;
+
         float finalScaleY;
         bool hasFinalScaleY;
+
+        float initScaleY;
 
         float finalAngle;
         bool hasFinalAngle;
 
+        float initAngle;
+
         float finalX;
         bool hasFinalX;
+
+        float initX;
 
         float finalY;
         bool hasFinalY;
 
+        float initY;
+
         float finalAlpha;
         bool hasFinalAlpha;
+
+        float initAlpha;
 
         float finalColorR;
         bool hasFinalColorR;
 
+        float initColorR;
+
         float finalColorG;
         bool hasFinalColorG;
+
+        float initColorG;
 
         float finalColorB;
         bool hasFinalColorB;
 
+        float initColorB;
+
         Color finalColor;
         bool hasFinalColor;
+
+        Color initColor;
 
         float finalSpeedLen;
         bool hasFinalSpeedLen;
 
+        float initSpeedLen;
+
         float finalSpeedDir;
         bool hasFinalSpeedDir;
+
+        float initSpeedDir;
 
         float originX;
         float originY;
@@ -89,9 +115,16 @@ namespace Otter {
         float delayTimer = 0;
         float colorLerp;
 
+        float initColorLerp;
+
         #endregion
 
         #region Public Fields
+
+        /// <summary>
+        /// The ease function to use when interpolating values.
+        /// </summary>
+        public Func<float, float> Ease;
 
         /// <summary>
         /// The ImageSet that the Particle is rendering.
@@ -212,6 +245,11 @@ namespace Otter {
         /// Determines if the Particle should animate the ImageSet.
         /// </summary>
         public bool Animate;
+
+        /// <summary>
+        /// The shader to use on the ImageSet.
+        /// </summary>
+        public Shader Shader;
 
         /// <summary>
         /// The specific frames to display for the ImageSet.  If set it will override the default FrameCount.
@@ -482,8 +520,6 @@ namespace Otter {
                 Animate = true;
             }
 
-            Tweener.CancelAndComplete();
-
             if (hasSpeedLen || hasSpeedDir) {
                 useSpeedXY = false;
             }
@@ -549,22 +585,21 @@ namespace Otter {
                 FinalColorB = ColorB;
             }
 
-            Tween(this, new {
-                SpeedX = FinalSpeedX,
-                SpeedY = FinalSpeedY,
-                ScaleX = FinalScaleX,
-                ScaleY = FinalScaleY,
-                Angle = FinalAngle,
-                Alpha = FinalAlpha,
-                ColorR = FinalColorR,
-                ColorG = FinalColorG,
-                ColorB = FinalColorB,
-                SpeedLen = FinalSpeedLen,
-                SpeedDir = FinalSpeedDir,
-                xpos = FinalX,
-                ypos = FinalY,
-                colorLerp = 1
-            }, LifeSpan);
+            initSpeedX = SpeedX;
+            initSpeedY = SpeedY;
+            initScaleX = ScaleX;
+            initScaleY = ScaleY;
+            initAngle = Angle;
+            initAlpha = Alpha;
+            initColorR = ColorR;
+            initColorG = ColorG;
+            initColorB = ColorB;
+            initSpeedLen = SpeedLen;
+            initSpeedDir = SpeedDir;
+            initX = X;
+            initY = Y;
+            initColorLerp = colorLerp;
+            initColor = Color;
 
             X += OffsetX;
             Y += OffsetY;
@@ -588,6 +623,14 @@ namespace Otter {
                 Y += SpeedY;
             }
 
+            if (Ease == null) {
+                Ease = Otter.Ease.Linear;
+            }
+
+            if (Shader != null) {
+                Image.Shader = Shader;
+            }
+
             Image.Visible = false;
         }
 
@@ -607,22 +650,44 @@ namespace Otter {
                 return;
             }
 
+            // Update values
+            float lerp = Ease((float)Timer / LifeSpan);
+            SpeedX = Util.Lerp(initSpeedX, finalSpeedX, lerp);
+            SpeedY = Util.Lerp(initSpeedY, finalSpeedY, lerp);
+            ScaleX = Util.Lerp(initScaleX, finalScaleX, lerp);
+            ScaleY = Util.Lerp(initScaleY, finalScaleY, lerp);
+            Angle = Util.Lerp(initAngle, finalAngle, lerp);
+            Alpha = Util.Lerp(initAlpha, finalAlpha, lerp);
+            ColorR = Util.Lerp(initColorR, finalColorR, lerp);
+            ColorG = Util.Lerp(initColorG, finalColorG, lerp);
+            ColorB = Util.Lerp(initColorB, finalColorB, lerp);
+            SpeedLen = Util.Lerp(initSpeedLen, finalSpeedLen, lerp);
+            SpeedDir = Util.Lerp(initSpeedDir, finalSpeedDir, lerp);
+            xpos = Util.Lerp(initX, finalX, lerp);
+            ypos = Util.Lerp(initY, finalY, lerp);
+            colorLerp = Util.Lerp(0, 1, lerp);
+
             Image.Visible = true;
 
+            // If the positions are not controlled by tweens.
             if (!tweenPosition) {
+                // if SpeedDir and Len are being used
                 if (!useSpeedXY) {
                     SpeedX = Util.PolarX(SpeedDir, SpeedLen);
                     SpeedY = Util.PolarY(SpeedDir, SpeedLen);
                 }
 
+                // Control the position with the particle speed.
                 X += SpeedX;
                 Y += SpeedY;
             }
             else {
+                // Control the position with the interpolated/tweened position.
                 X = xpos;
                 Y = ypos;
             }
 
+            // Set up animation
             int endFrame;
             if (hasFrameCount) {
                 endFrame = FrameOffset + FrameCount;
@@ -631,6 +696,7 @@ namespace Otter {
                 endFrame = Image.Frames;
             }
 
+            // Animate the particle
             if (Animate) {
                 var playCount = Loops + 1;
                 var frameIndex = (int)Util.ScaleClamp(Timer, 0, LifeSpan, 0, FrameCount * playCount);
@@ -646,6 +712,7 @@ namespace Otter {
                 Image.Frame = 0;
             }
 
+            // Control the image scale.
             Image.ScaleX = ScaleX;
             if (LockScaleRatio) {
                 Image.ScaleY = ScaleX;
@@ -654,17 +721,21 @@ namespace Otter {
                 Image.ScaleY = ScaleY;
             }
 
+            // Determines if the particle faces the direction of its speed vector.
             if (MotionAngle) {
                 Image.Angle = Util.Angle(SpeedX, SpeedY);
             }
             else {
                 Image.Angle = Angle;
             }
+
+            // Control the blend mode.
             Image.Blend = Blend;
 
+            // Color the color.
             if (hasColor) {
                 if (hasFinalColor) {
-                    Image.Color = Util.LerpColor(Color, FinalColor, colorLerp);
+                    Image.Color = Util.LerpColor(initColor, finalColor, colorLerp);
                 }
                 else {
                     Image.Color = Color;
@@ -675,6 +746,7 @@ namespace Otter {
                 Image.Color = new Color(ColorR, ColorG, ColorB, Alpha);
             }
 
+            // Flip the image.
             Image.FlippedX = FlipX;
             Image.FlippedY = FlipY;
         }

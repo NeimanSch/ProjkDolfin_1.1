@@ -40,6 +40,13 @@ namespace OtterTutorial.Entities
             bossExplode = boss;
         }
 
+        ~Explosion()
+        {
+            //Console.WriteLine("explosion dest");
+            this.explode = null;
+        }
+
+
         public override void Update()
         {
             base.Update();
@@ -63,7 +70,9 @@ namespace OtterTutorial.Entities
             if (bossExplode)
             {
                 //Global.gameMusic.Stop();
+                //Console.WriteLine(Global.TUTORIAL.Scene.EntityCount);
                 Global.TUTORIAL.Scene.RemoveAll();
+
                 Global.TUTORIAL.SwitchScene(new EndScene());
             }
         }

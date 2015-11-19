@@ -15,7 +15,7 @@ namespace OtterTutorial.Entities
 
         // Default bullet speed
         public float bulletSpeed = 10.0f;
-        public float enemyBulletSpeed = 5.0f;
+        public float enemyBulletSpeed = 2.0f;
         
 
         // Direction the bullet is going to travel in
@@ -45,7 +45,8 @@ namespace OtterTutorial.Entities
         // The image object that is our bullet's graphic
         public virtual Image image { get; set; }
 
-        public Sound shootSnd = new Sound(Assets.SND_BULLET_SHOOT);
+        
+        
 
         public float xDiff = 0;
         public float yDiff = 0;
@@ -75,8 +76,6 @@ namespace OtterTutorial.Entities
 
             data = new BulletData(0);
 
-            // This line goes in our constructor
-            shootSnd.Play();
 
             // Add a BulletTrail particle as soon as the Bullet enters the Scene
             Global.TUTORIAL.Scene.Add(new BulletTrail(X, Y));

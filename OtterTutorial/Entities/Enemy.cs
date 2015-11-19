@@ -13,7 +13,7 @@ namespace OtterTutorial.Entities
     {
         public const int WIDTH = 32;
         public const int HEIGHT = 40;
-        public float moveSpeed = 4.0f;
+        public float moveSpeed = 1.8f;
         public int enemyFireCounter;
 
         // Default speed an enemy will move in

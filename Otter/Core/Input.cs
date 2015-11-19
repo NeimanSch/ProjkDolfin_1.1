@@ -1,24 +1,113 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using SFML;
-using SFML.Window;
 using System.Globalization;
+using System.Text;
 
 namespace Otter {
     /// <summary>
     /// Class used for managing input from the keyboard, mouse, and joysticks. Updated by the active Game.
     /// </summary>
     public class Input {
-        
+
         #region Static Fields
 
         /// <summary>
         /// A reference to the current active instance.
         /// </summary>
         public static Input Instance;
+
+        #endregion
+
+        #region Static Properties
+
+        /// <summary>
+        /// The current number of joysticks connected.
+        /// </summary>
+        public static int JoysticksConnected {
+            get {
+                int count = 0;
+                for (uint i = 0; i < Joystick.Count; i++) {
+                    if (Joystick.IsConnected(i)) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        }
+
+        /// <summary>
+        /// The maximum possible amount of joysticks that can be connected.
+        /// </summary>
+        public static int JoysticksSupported {
+            get {
+                return (int)Joystick.Count;
+            }
+        }
+
+        #endregion
+
+        #region Static Methods
+
+        /// <summary>
+        /// Convert a char to a Key code.
+        /// </summary>
+        /// <param name="key">The char to convert into a Key.</param>
+        /// <returns>The Key.  Returns Key.Unknown if no match is found.</returns>
+        public static Key CharToKey(char key) {
+            key = char.ToUpper(key);
+            switch (key) {
+                case 'A': return Key.A;
+                case 'B': return Key.B;
+                case 'C': return Key.C;
+                case 'D': return Key.D;
+                case 'E': return Key.E;
+                case 'F': return Key.F;
+                case 'G': return Key.G;
+                case 'H': return Key.H;
+                case 'I': return Key.I;
+                case 'J': return Key.J;
+                case 'K': return Key.K;
+                case 'L': return Key.L;
+                case 'M': return Key.M;
+                case 'N': return Key.N;
+                case 'O': return Key.O;
+                case 'P': return Key.P;
+                case 'Q': return Key.Q;
+                case 'R': return Key.R;
+                case 'S': return Key.S;
+                case 'T': return Key.T;
+                case 'U': return Key.U;
+                case 'V': return Key.V;
+                case 'W': return Key.W;
+                case 'X': return Key.X;
+                case 'Y': return Key.Y;
+                case 'Z': return Key.Z;
+                case '0': return Key.Num0;
+                case '1': return Key.Num1;
+                case '2': return Key.Num2;
+                case '3': return Key.Num3;
+                case '4': return Key.Num4;
+                case '5': return Key.Num5;
+                case '6': return Key.Num6;
+                case '7': return Key.Num7;
+                case '8': return Key.Num8;
+                case '9': return Key.Num9;
+                case '[': return Key.LBracket;
+                case ']': return Key.RBracket;
+                case ';': return Key.SemiColon;
+                case ',': return Key.Comma;
+                case '.': return Key.Period;
+                case '/': return Key.Slash;
+                case '\\': return Key.BackSlash;
+                case '~': return Key.Tilde;
+                case '=': return Key.Equal;
+                case '+': return Key.Add;
+                case '-': return Key.Dash;
+                case ' ': return Key.Space;
+            }
+            return Key.Unknown;
+        }
 
         #endregion
 
@@ -111,20 +200,7 @@ namespace Otter {
         /// </summary>
         public List<int> LastButton { get; private set; }
 
-        /// <summary>
-        /// The current number of joysticks connected.
-        /// </summary>
-        public int JoysticksConnected {
-            get {
-                int count = 0;
-                for (uint i = 0; i < Joystick.Count; i++) {
-                    if (Joystick.IsConnected(i)) {
-                        count++;
-                    }
-                }
-                return count;
-            }
-        }
+        
 
         /// <summary>
         /// The current X position of the mouse.
@@ -291,6 +367,11 @@ namespace Otter {
         }
 
         void OnKeyPressed(object sender, KeyEventArgs e) {
+            if (Game.Debugger != null) {
+                // Ignore presses from the debug toggle key.
+                if ((Key)e.Code == Game.Debugger.ToggleKey) return;
+            }
+
             if (!activeKeys[(Key)e.Code]) {
                 keysPressed++;
             }
@@ -366,6 +447,15 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Check if a key has been pressed this update.
+        /// </summary>
+        /// <param name="c">The key to check.</param>
+        /// <returns>True if the key has been pressed.</returns>
+        public bool KeyPressed(char c) {
+            return KeyPressed(CharToKey(c));
+        }
+
+        /// <summary>
         /// Check if a key has been released this update.
         /// </summary>
         /// <param name="k">The key to check.</param>
@@ -375,6 +465,15 @@ namespace Otter {
                 return keysPressed < prevKeysPressed;
             }
             return !currentKeys[k] && previousKeys[k];
+        }
+
+        /// <summary>
+        /// Check if a key has been released this update.
+        /// </summary>
+        /// <param name="c">The key to check.</param>
+        /// <returns>True if the key has been released.</returns>
+        public bool KeyReleased(char c) {
+            return KeyReleased(CharToKey(c));
         }
 
         /// <summary>
@@ -390,12 +489,30 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Check if a key is currently down.
+        /// </summary>
+        /// <param name="c">The key to check.</param>
+        /// <returns>True if the key is down.</returns>
+        public bool KeyDown(char c) {
+            return KeyDown(CharToKey(c));
+        }
+
+        /// <summary>
         /// Check if a key is currently up.
         /// </summary>
         /// <param name="k">The key to check.</param>
         /// <returns>True if the key is up.</returns>
         public bool KeyUp(Key k) {
             return !KeyDown(k);
+        }
+
+        /// <summary>
+        /// Check if a key is currently up.
+        /// </summary>
+        /// <param name="c">The key to check.</param>
+        /// <returns>True if the key is up.</returns>
+        public bool KeyUp(char c) {
+            return KeyUp(CharToKey(c));
         }
 
         /// <summary>
@@ -497,10 +614,18 @@ namespace Otter {
         /// <summary>
         /// Set the threshold for an axis to act as an AxisButton.  Defaults to 50 or one half of the joystick's total range.
         /// </summary>
-        /// <param name="axis">The axis to set.</param>
+        /// <param name="axis">The JoyAxis to set.</param>
         /// <param name="threshold">The threshold that the axis must pass to act as a button press.</param>
         public void SetAxisThreshold(JoyAxis axis, float threshold) {
             axisThreshold[axis] = threshold;
+        }
+
+        /// <summary>
+        /// Gets the axis threshold for an axis to act as an AxisButton.
+        /// </summary>
+        /// <param name="axis">The JoyAxis.</param>
+        public float GetAxisThreshold(JoyAxis axis) {
+            return axisThreshold[axis];
         }
 
         /// <summary>
@@ -912,13 +1037,19 @@ namespace Otter {
     }
 
     /// <summary>
-    /// The four cardinal directions.
+    /// Flags to represent Direction.
     /// </summary>
+    [Flags]
     public enum Direction {
-        Up,
-        Right,
-        Down,
-        Left
+        None = 0,
+        Up = 1 << 0,
+        Right = 1 << 1,
+        Down = 1 << 2,
+        Left = 1 << 3,
+        UpRight = Up | Right,
+        UpLeft = Up | Left,
+        DownRight = Down | Right,
+        DownLeft = Down | Left
     }
 
     /// <summary>

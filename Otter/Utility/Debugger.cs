@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
-using SFML.Window;
-using System.Globalization;
 
 namespace Otter {
     /// <summary>
@@ -22,6 +22,10 @@ namespace Otter {
         Text textFramesLeft = new Text(24);
         Text textPerformance = new Text(24);
 
+        Text textPastCommandsLive = new Text(16);
+
+        List<string> logTags = new List<string>() { "", "ERROR" };
+
         Image imgScrollBarBg;
         Image imgScrollBar;
 
@@ -39,11 +43,12 @@ namespace Otter {
 
         string keyString = "";
 
-        bool enterPressed = false;
-        bool dismissPressed = false;
-        internal bool Dismissed = false;
-        bool executionError = false;
-        bool locked = false;
+        int liveConsoleLines = 0;
+
+        bool enterPressed;
+        bool dismissPressed;
+        bool executionError;
+        bool locked;
 
         int paddingMax = 30;
         int padding = 30;
@@ -64,7 +69,7 @@ namespace Otter {
 
         Dictionary<string, object> watching = new Dictionary<string, object>();
 
-        int debugLogBufferSize = 1000;
+        int debugLogBufferSize = 10000;
 
         int logIndex;
 
@@ -142,6 +147,19 @@ namespace Otter {
         /// </summary>
         public float DebugCameraY { get; private set; }
 
+        /// <summary>
+        /// The size of the live console in lines. If 0 the live console is hidden.
+        /// </summary>
+        public int LiveConsoleSize {
+            get {
+                return liveConsoleLines;
+            }
+            set {
+                liveConsoleLines = value;
+                liveConsoleLines = (int)Util.Clamp(liveConsoleLines, 0, maxLines + 3);
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -209,7 +227,7 @@ namespace Otter {
         }
 
         void CmdFps(string[] a) {
-            showPerformance = int.Parse(a[0]);
+            ShowPerformance(int.Parse(a[0]));
         }
 
         void CmdNext(string[] a) {
@@ -247,6 +265,25 @@ namespace Otter {
                 Log(w.Key.PadRight(20) + w.Value.ToString(), false);
             }
             Log("", false);
+        }
+
+        void CmdLog(string[] a) {
+            var tag = a[0].ToUpper();
+            if (tag == "") return;
+            if (logTags.Contains(tag)) {
+                logTags.Remove(tag);
+                Log("Removed tag " + tag);
+            }
+            else {
+                logTags.Add(tag);
+                Log("Added tag " + tag);
+            }
+        }
+
+        void CmdLiveLog(string[] a) {
+            var lines = int.Parse(a[0]);
+
+            LiveConsoleSize = lines;
         }
 
         #endregion
@@ -377,9 +414,7 @@ namespace Otter {
 
         #endregion
 
-        void RegisterInstantCommand(string name, string help, CommandFunction function, params CommandType[] types) {
-            instantCommands.Add(name, new DebugCommand(function, types) { HelpDescription = help, Name = name });
-        }
+        
 
         void SendCommand(string str) {
             enterPressed = false;
@@ -400,7 +435,7 @@ namespace Otter {
                 ExecuteCommand();
             }
             else {
-                Log("[ERROR] Command Not Found.", false);
+                Log("error", "Command not found.");
                 ErrorFlash();
             }
 
@@ -488,7 +523,7 @@ namespace Otter {
                     commands[function].Execute(arguments);
                 }
                 catch (Exception ex) {
-                    Log("[ERROR] " + ex.Message, false);
+                    Log("error", ex.Message);
                     executionError = true;
                 }
             }
@@ -497,7 +532,7 @@ namespace Otter {
                     instantCommands[function].Execute(arguments);
                 }
                 catch (Exception ex) {
-                    Log("[ERROR] " + ex.Message, false);
+                    Log("error", ex.Message);
                     ErrorFlash();
                 }
             }
@@ -507,6 +542,7 @@ namespace Otter {
 
         void UpdateConsoleText() {
             textPastCommands.String = "";
+            textPastCommandsLive.String = "";
 
             int logMax = (int)Util.Max(debugLog.Count - maxLines, 0);
             logIndex = (int)Util.Clamp(logIndex, 0, logMax);
@@ -516,6 +552,13 @@ namespace Otter {
             for (var i = 0; i < maxLines; i++) {
                 if (i < debugLog.Count) {
                     textPastCommands.String += debugLog[i + logStart] + "\n";
+                }
+            }
+
+            int liveLogStart = (int)Util.Clamp(debugLog.Count - liveConsoleLines, 0, debugLog.Count);
+            for (var i = 0; i < liveConsoleLines; i++) {
+                if (i < debugLog.Count) {
+                    textPastCommandsLive.String += debugLog[i + liveLogStart] + "\n";
                 }
             }
 
@@ -560,11 +603,30 @@ namespace Otter {
                 textPerformance.String += "\nRender " + game.RenderTime.ToString("00") + "ms (" + game.RenderCount.ToString("0000") + " Renders)";
             }
 
+            textPerformance.Update();
+            textPerformance.Y = 0;
+            textPerformance.X = renderSurface.Width - textPerformance.Width;
         }
 
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Display performance information at a specified detail level. Set to 0 to disable. 5 is the most detailed.
+        /// </summary>
+        /// <param name="level">The level of detail.  0 for disabled, 5 for the most detailed.</param>
+        public void ShowPerformance(int level) {
+            showPerformance = level;
+        }
+
+        /// <summary>
+        /// Toggle the logging of a specific tag. If the tag is off, it will be turned on, and vice versa.
+        /// </summary>
+        /// <param name="tag">The tag to toggle.</param>
+        public void LogTag(string tag) {
+            CmdLog(new string[] {tag});
+        }
 
         /// <summary>
         /// Adds a command to the debugger.  Automatically derive the console name by the name of the method.
@@ -613,6 +675,28 @@ namespace Otter {
         }
 
         /// <summary>
+        /// Add a command to the debugger that instantly executes. (Doesn't wait for an update.)
+        /// </summary>
+        /// <param name="name">The name of the method in the debugger.</param>
+        /// <param name="help">The help text to display in the console for the function.</param>
+        /// <param name="function">The method to register.</param>
+        /// <param name="types">The types for the arguments.</param>
+        public void RegisterInstantCommand(string name, string help, CommandFunction function, params CommandType[] types) {
+            if (commands.ContainsKey(name)) return;
+            if (instantCommands.ContainsKey(name)) return;
+
+            instantCommands.Add(name, new DebugCommand(function, types) { HelpDescription = help, Name = name });
+        }
+
+        public void RegisterInstantCommand(CommandFunction function, string help, params CommandType[] types) {
+            RegisterInstantCommand(function.Method.Name.ToLower(), help, function, types);
+        }
+
+        public void RegisterInstantCommand(CommandFunction function, params CommandType[] types) {
+            RegisterInstantCommand(function, types);
+        }
+
+        /// <summary>
         /// Remove a command from the debugger.
         /// </summary>
         /// <param name="name">The name of the command to remove.</param>
@@ -625,13 +709,15 @@ namespace Otter {
         /// <summary>
         /// Writes log data to the console.
         /// </summary>
+        /// <param name="tag">The tag to associate the log with.</param>
         /// <param name="str">The string to add to the console.</param>
         /// <param name="timestamp">Include a timestamp with the item.</param>
-        public void Log(object str, bool timestamp = true) {
+        public void Log(string tag, object str, bool timestamp = true) {
+            tag = tag.ToUpper();
             if (str.ToString().Contains('\n')) {
                 var split = str.ToString().Split('\n');
                 foreach (var s in split) {
-                    Log(s);
+                    Log(tag, s, timestamp);
                 }
                 return;
             }
@@ -641,12 +727,28 @@ namespace Otter {
             if (debugLog.Count == debugLogBufferSize) {
                 debugLog.RemoveAt(0);
             }
+            var tagstr = "";
+            if (tag != "") {
+                tagstr = string.Format("[{0}] ", tag);
+                str = tagstr + str;
+            }
             if (timestamp) {
                 string format = game.MeasureTimeInFrames && game.FixedFramerate ? "000000" : "00000.000";
                 str = game.Timer.ToString(format) + ": " + str;
             }
-            debugLog.Add(str.ToString());
+            if (logTags.Contains(tag.ToUpper())) {
+                debugLog.Add(str.ToString());
+                UpdateConsoleText();
+            }
+        }
 
+        /// <summary>
+        /// Writes log data to the console.
+        /// </summary>
+        /// <param name="str">The string to add to the console.</param>
+        /// <param name="timestamp">Include a timestamp with the item.</param>
+        public void Log(object str, bool timestamp = true) {
+            Log("", str, timestamp);
         }
 
         /// <summary>
@@ -687,6 +789,10 @@ namespace Otter {
             textPastCommands.OutlineColor = Color.Black;
             textPastCommands.OutlineThickness = 1;
 
+            textPastCommandsLive.Scroll = 0;
+            textPastCommandsLive.OutlineColor = Color.Black;
+            textPastCommandsLive.OutlineThickness = 2;
+
             textCommandsBuffered.Scroll = 0;
             textCommandsBuffered.OutlineThickness = 2;
             textCommandsBuffered.OutlineColor = Color.Black;
@@ -712,10 +818,12 @@ namespace Otter {
             RegisterInstantCommand("overlay", "Set the opacity of the console background to X.", CmdOverlay, CommandType.Float);
             RegisterInstantCommand("music", "Change the music volume. 0 - 1.", CmdMusic, CommandType.Float);
             RegisterInstantCommand("sound", "Change the sound volume. 0 - 1.", CmdSound, CommandType.Float);
+            RegisterInstantCommand("log", "Toggle log tags.", CmdLog, CommandType.String);
             RegisterInstantCommand("clear", "Clears the console.", CmdClear);
             RegisterInstantCommand("showfps", "Shows performance information. Use 0 - 5.", CmdFps, CommandType.Int);
             RegisterInstantCommand("next", "Advances the game by X updates.", CmdNext, CommandType.Int);
             RegisterInstantCommand("watch", "Display watched values.", CmdWatch);
+            RegisterInstantCommand("livelog", "Displays X lines of the console live.", CmdLiveLog, CommandType.Int);
             RegisterInstantCommand("quit", "Exits the game.", CmdExit);
 
             RegisterCommand("spawn", "Add a new entity at X, Y.", CmdSpawn, CommandType.String, CommandType.Int, CommandType.Int);
@@ -749,6 +857,7 @@ namespace Otter {
 
             textInput.FontSize = (int)(textSizeLarge * fontScale);
             textPastCommands.FontSize = (int)(textSizeMedium * fontScale);
+            textPastCommandsLive.FontSize = (int)(textSizeMedium * fontScale);
             textCommandsBuffered.FontSize = (int)(textSizeSmall * fontScale);
             textCountdown.FontSize = (int)(textSizeHuge * fontScale);
             textFramesLeft.FontSize = (int)(textSizeMedium * fontScale);
@@ -758,7 +867,6 @@ namespace Otter {
             imgOtter.Scale = fontScale;
 
             textFramesLeft.Y = renderSurface.Height - textFramesLeft.LineSpacing;
-            textPerformance.Y = 0;
 
             textInput.Y = renderSurface.Height - textInput.LineSpacing - padding;
             textInput.X = padding;
@@ -773,6 +881,9 @@ namespace Otter {
 
             textPastCommands.Y = padding;
             textPastCommands.X = padding;
+
+            textPastCommandsLive.Y = padding / 2;
+            textPastCommandsLive.X = padding / 2;
 
             textCountdown.X = renderSurface.HalfWidth;
             textCountdown.Y = renderSurface.HalfHeight;
@@ -792,12 +903,16 @@ namespace Otter {
             imgScrollBar.Scroll = 0;
             imgScrollBarBg.Scroll = 0;
 
-            textCamera.CenterOrigin();
+            textCamera.CenterTextOrigin();
             textCamera.X = renderSurface.HalfWidth;
             textCamera.Y = renderSurface.Height - padding - textCamera.LineSpacing;
         }
 
         internal void WindowInit() {
+            if (IsOpen) {
+                RemoveInput();
+                AddInput();
+            }
             game.Window.KeyPressed += OnKeyPressedToggle;
         }
 
@@ -908,6 +1023,8 @@ namespace Otter {
                 SendCommand(keyString);
             }
 
+            
+
             time += game.DeltaTime;
         }
 
@@ -992,6 +1109,9 @@ namespace Otter {
                     Draw.Graphic(textPastCommands, x, y);
                     Draw.Graphic(textCommandsBuffered, x, y);
                 }
+            }
+            else {
+                if (liveConsoleLines > 0) Draw.Graphic(textPastCommandsLive, x, y);
             }
 
             if (currentState == stateCamera) {

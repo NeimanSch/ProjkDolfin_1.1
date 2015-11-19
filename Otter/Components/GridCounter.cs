@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -65,6 +62,34 @@ namespace Otter {
         /// </summary>
         public int Count {
             get { return Width * Height; }
+        }
+
+        /// <summary>
+        /// Move the index left.
+        /// </summary>
+        public void MoveLeft() {
+            X -= 1;
+        }
+
+        /// <summary>
+        /// Move the index right.
+        /// </summary>
+        public void MoveRight() {
+            X += 1;
+        }
+
+        /// <summary>
+        /// Move the index up.
+        /// </summary>
+        public void MoveUp() {
+            Y -= 1;
+        }
+
+        /// <summary>
+        /// Move the index down.
+        /// </summary>
+        public void MoveDown() {
+            Y += 1;
         }
 
         /// <summary>

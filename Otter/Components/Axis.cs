@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SFML.Window;
+using System;
 using System.Collections.Generic;
-using SFML.Window;
 
 namespace Otter {
     /// <summary>
@@ -9,17 +9,53 @@ namespace Otter {
     /// </summary>
     public class Axis : Component {
 
+        #region Static Methods
+
+        /// <summary>
+        /// Create a new Axis that uses the arrow keys for movement.
+        /// </summary>
+        /// <returns>A new Axis.</returns>
+        public static Axis CreateArrowKeys() {
+            return new Axis(Key.Up, Key.Right, Key.Down, Key.Left);
+        }
+
+        /// <summary>
+        /// Create a new Axis that uses WASD for movement.
+        /// </summary>
+        /// <returns>A new Axis.</returns>
+        public static Axis CreateWASD() {
+            return new Axis(Key.W, Key.D, Key.S, Key.A);
+        }
+
+        #endregion
+
         #region Private Fields
 
-        Dictionary<Direction, List<Key>> keys = new Dictionary<Direction, List<Key>>();
-        Dictionary<Direction, List<List<int>>> buttons = new Dictionary<Direction, List<List<int>>>();
-
-        List<List<JoyAxis>> xAxes = new List<List<JoyAxis>>();
-        List<List<JoyAxis>> yAxes = new List<List<JoyAxis>>();
+        
 
         #endregion
 
         #region Public Fields
+
+        /// <summary>
+        /// The Keys to uss.
+        /// </summary>
+        public Dictionary<Direction, List<Key>> Keys = new Dictionary<Direction, List<Key>>();
+
+        /// <summary>
+        /// The joystick buttons to use.
+        /// </summary>
+        public Dictionary<Direction, List<List<int>>> JoyButtons = new Dictionary<Direction, List<List<int>>>();
+
+        /// <summary>
+        /// The X axes to use.
+        /// </summary>
+        public List<List<JoyAxis>> AxesX = new List<List<JoyAxis>>();
+
+        /// <summary>
+        /// The Y axes to use.
+        /// </summary>
+        public List<List<JoyAxis>> AxesY = new List<List<JoyAxis>>();
 
         /// <summary>
         /// Determines if the axis is currently enabled.  If false, X and Y will report 0.
@@ -54,6 +90,15 @@ namespace Otter {
         #region Public Properties
 
         /// <summary>
+        /// The current Vector2 position of the axis.
+        /// </summary>
+        public Vector2 Position {
+            get {
+                return new Vector2(X, Y);
+            }
+        }
+
+        /// <summary>
         /// The X position of the axis from -1 to 1.
         /// </summary>
         public float X { get; private set; }
@@ -79,15 +124,35 @@ namespace Otter {
         public bool ForcedInput { get; private set; }
 
         /// <summary>
+        /// The the up Button for the Axis.
+        /// </summary>
+        public Button Up { get; private set; }
+       
+        /// <summary>
+        /// The the left Button for the Axis.
+        /// </summary>
+        public Button Left { get; private set; }
+
+        /// <summary>
+        /// Gets the down Button for the Axis.
+        /// </summary>
+        public Button Down { get; private set; }
+
+        /// <summary>
+        /// Gets the right Button for the Axis.
+        /// </summary>
+        public Button Right { get; private set; }
+
+        /// <summary>
         /// Check if the axis has any means of input currently registered to it.
         /// </summary>
         public bool HasInput {
             get {
                 if (ForcedInput) return true;
-                if (keys.Count > 0) return true;
-                if (buttons.Count > 0) return true;
-                if (xAxes.Count > 0) return true;
-                if (yAxes.Count > 0) return true;
+                if (Keys.Count > 0) return true;
+                if (JoyButtons.Count > 0) return true;
+                if (AxesX.Count > 0) return true;
+                if (AxesY.Count > 0) return true;
                 return false;
             }
         }
@@ -112,17 +177,23 @@ namespace Otter {
             ForcedInput = false;
 
             foreach (Direction d in Enum.GetValues(typeof(Direction))) {
-                keys[d] = new List<Key>();
-                buttons.Add(d, new List<List<int>>());
+                Keys[d] = new List<Key>();
+                JoyButtons.Add(d, new List<List<int>>());
                 for (int i = 0; i < Joystick.Count; i++) {
-                    buttons[d].Add(new List<int>());
+                    JoyButtons[d].Add(new List<int>());
                 }
             }
 
             for (int i = 0; i < Joystick.Count; i++) {
-                xAxes.Add(new List<JoyAxis>());
-                yAxes.Add(new List<JoyAxis>());
+                AxesX.Add(new List<JoyAxis>());
+                AxesY.Add(new List<JoyAxis>());
             }
+
+            // Create buttons for Axis.
+            Up = new Button();
+            Down = new Button();
+            Left = new Button();
+            Right = new Button();
         }
 
         /// <summary>
@@ -143,9 +214,11 @@ namespace Otter {
         /// <param name="x">The JoyAxis to use for X.</param>
         /// <param name="y">The JoyAxis to use for Y.</param>
         /// <param name="joystick">The joystick id to use.</param>
-        public Axis(JoyAxis x, JoyAxis y, int joystick = 0)
+        public Axis(JoyAxis x, JoyAxis y, params int[] joystick)
             : this() {
-            AddAxis(x, y, joystick);
+                foreach (var j in joystick) {
+                    AddJoyAxis(x, y, j);
+                }
         }
 
         /// <summary>
@@ -156,7 +229,7 @@ namespace Otter {
         /// <param name="down">The AxisButton for Down.</param>
         /// <param name="left">The AxisButton for Left.</param>
         /// <param name="joystick">The joystick id to use.</param>
-        public Axis(AxisButton up, AxisButton right, AxisButton down, AxisButton left, int joystick = 0)
+        public Axis(AxisButton up, AxisButton right, AxisButton down, AxisButton left, params int[] joystick)
             : this() {
             AddButton(up, Direction.Up, joystick);
             AddButton(right, Direction.Right, joystick);
@@ -175,9 +248,35 @@ namespace Otter {
         /// <param name="y">The y axis of the joystick.</param>
         /// <param name="joystick">The joystick id.</param>
         /// <returns>The Axis.</returns>
-        public Axis AddAxis(JoyAxis x, JoyAxis y, int joystick = 0) {
-            xAxes[joystick].Add(x);
-            yAxes[joystick].Add(y);
+        public Axis AddJoyAxis(JoyAxis x, JoyAxis y, params int[] joystick) {
+            foreach (var j in joystick) {
+                AxesX[j].Add(x);
+                AxesY[j].Add(y);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Add another Axis to this Axis.
+        /// </summary>
+        /// <param name="source">The source Axis to use.</param>
+        /// <returns>This Axis.</returns>
+        public Axis AddAxis(Axis source) {
+            foreach (Direction d in Enum.GetValues(typeof(Direction))) {
+                // Copy keys from source Axis.
+                Keys[d].AddRange(source.Keys[d]);
+                for (int i = 0; i < Joystick.Count; i++) {
+                    // Copy buttons from source Axis.
+                    JoyButtons[d].AddRange(source.JoyButtons[d]);
+                }
+            }
+
+            for (int i = 0; i < Joystick.Count; i++) {
+                // Copy joy axes from source Axis.
+                AxesX[i].AddRange(source.AxesX[i]);
+                AxesY[i].AddRange(source.AxesY[i]);
+            }
+
             return this;
         }
 
@@ -188,8 +287,10 @@ namespace Otter {
         /// <param name="direction">The direction this button should effect.</param>
         /// <param name="joystick">The joystick id.</param>
         /// <returns>The Axis.</returns>
-        public Axis AddButton(int button, Direction direction, int joystick = 0) {
-            buttons[direction][joystick].Add(button);
+        public Axis AddButton(int button, Direction direction, params int[] joystick) {
+            foreach (var j in joystick) {
+                JoyButtons[direction][j].Add(button);
+            }
             return this;
         }
 
@@ -200,8 +301,10 @@ namespace Otter {
         /// <param name="direction">The direction this axis button should effect.</param>
         /// <param name="joystick">The joystick id.</param>
         /// <returns>The Axis.</returns>
-        public Axis AddButton(AxisButton button, Direction direction, int joystick = 0) {
-            AddButton((int)button, direction, joystick);
+        public Axis AddButton(AxisButton button, Direction direction, params int[] joystick) {
+            foreach (var j in joystick) {
+                AddButton((int)button, direction, j);
+            }
             return this;
         }
 
@@ -212,7 +315,7 @@ namespace Otter {
         /// <param name="direction">The direction this key should effect.</param>
         /// <returns>The Axis.</returns>
         public Axis AddKey(Key key, Direction direction) {
-            keys[direction].Add(key);
+            Keys[direction].Add(key);
 
             return this;
         }
@@ -220,17 +323,17 @@ namespace Otter {
         /// <summary>
         /// Add keys.
         /// </summary>
-        /// <param name="k">Four keys to create a pair of axes from (Up, Right, Down, Left).</param>
+        /// <param name="upRightDownLeft">Four keys to create a pair of axes from (Up, Right, Down, Left).</param>
         /// <returns>The Axis.</returns>
-        public Axis AddKeys(params Key[] k) {
-            if (k.Length != 4) {
+        public Axis AddKeys(params Key[] upRightDownLeft) {
+            if (upRightDownLeft.Length != 4) {
                 throw new ArgumentException("Must use four keys for an axis!");
             }
 
-            AddKey(k[0], Direction.Up);
-            AddKey(k[1], Direction.Right);
-            AddKey(k[2], Direction.Down);
-            AddKey(k[3], Direction.Left);
+            AddKey(upRightDownLeft[0], Direction.Up);
+            AddKey(upRightDownLeft[1], Direction.Right);
+            AddKey(upRightDownLeft[2], Direction.Down);
+            AddKey(upRightDownLeft[3], Direction.Left);
 
             return this;
         }
@@ -294,19 +397,16 @@ namespace Otter {
             Y = 0;
 
             for (int i = 0; i < Joystick.Count; i++) {
-                bool live = false;
-                foreach (JoyAxis axis in xAxes[i]) {
+                foreach (JoyAxis axis in AxesX[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (Math.Abs(a) >= DeadZone) live = true;
                 }
-                foreach (JoyAxis axis in yAxes[i]) {
+                foreach (JoyAxis axis in AxesY[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (Math.Abs(a) >= DeadZone) live = true;
                 }
 
-                foreach (JoyAxis axis in xAxes[i]) {
+                foreach (JoyAxis axis in AxesX[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (live) {
+                    if (Math.Abs(a) >= DeadZone) {
                         if (RemapRange) {
                             if (a > 0) {
                                 X += Util.ScaleClamp(a, 0, 1, 0, 1);
@@ -321,9 +421,10 @@ namespace Otter {
                     }
                     if (RoundInput) X = (float)Math.Round(X, 2);
                 }
-                foreach (JoyAxis axis in yAxes[i]) {
+
+                foreach (JoyAxis axis in AxesY[i]) {
                     float a = Input.Instance.GetAxis(axis, i) * 0.01f;
-                    if (live) {
+                    if (Math.Abs(a) >= DeadZone) {
                         if (RemapRange) {
                             if (a > 0) {
                                 Y += Util.ScaleClamp(a, 0, 1, 0, 1);
@@ -338,46 +439,47 @@ namespace Otter {
                     }
                     if (RoundInput) Y = (float)Math.Round(Y, 2);
                 }
+
             }
 
-            foreach (Key k in keys[Direction.Up]) {
+            foreach (Key k in Keys[Direction.Up]) {
                 if (Input.Instance.KeyDown(k)) {
                     Y -= 1;
                 }
             }
-            foreach (Key k in keys[Direction.Down]) {
+            foreach (Key k in Keys[Direction.Down]) {
                 if (Input.Instance.KeyDown(k)) {
                     Y += 1;
                 }
             }
-            foreach (Key k in keys[Direction.Left]) {
+            foreach (Key k in Keys[Direction.Left]) {
                 if (Input.Instance.KeyDown(k)) {
                     X -= 1;
                 }
             }
-            foreach (Key k in keys[Direction.Right]) {
+            foreach (Key k in Keys[Direction.Right]) {
                 if (Input.Instance.KeyDown(k)) {
                     X += 1;
                 }
             }
 
             for (int i = 0; i < Joystick.Count; i++) {
-                foreach (int b in buttons[Direction.Up][i]) {
+                foreach (int b in JoyButtons[Direction.Up][i]) {
                     if (Input.Instance.ButtonDown(b, i)) {
                         Y -= 1;
                     }
                 }
-                foreach (int b in buttons[Direction.Down][i]) {
+                foreach (int b in JoyButtons[Direction.Down][i]) {
                     if (Input.Instance.ButtonDown(b, i)) {
                         Y += 1;
                     }
                 }
-                foreach (int b in buttons[Direction.Left][i]) {
+                foreach (int b in JoyButtons[Direction.Left][i]) {
                     if (Input.Instance.ButtonDown(b, i)) {
                         X -= 1;
                     }
                 }
-                foreach (int b in buttons[Direction.Right][i]) {
+                foreach (int b in JoyButtons[Direction.Right][i]) {
                     if (Input.Instance.ButtonDown(b, i)) {
                         X += 1;
                     }
@@ -386,6 +488,30 @@ namespace Otter {
 
             X = Util.Clamp(X, -1, 1);
             Y = Util.Clamp(Y, -1, 1);
+
+            // Update the buttons.  This makes it easy to read the Axis as buttons for Up, Right, Left, Down.
+            Right.UpdateFirst();
+            Up.UpdateFirst();
+            Left.UpdateFirst();
+            Down.UpdateFirst();
+
+            Right.ForceState(false);
+            Up.ForceState(false);
+            Left.ForceState(false);
+            Down.ForceState(false);
+
+            if (X > 0.5f) {
+                Right.ForceState(true);
+            }
+            if (X < -0.5f) {
+                Left.ForceState(true);
+            }
+            if (Y > 0.5f) {
+                Down.ForceState(true);
+            }
+            if (Y < -0.5f) {
+                Up.ForceState(true);
+            }
         }
 
         public override string ToString() {

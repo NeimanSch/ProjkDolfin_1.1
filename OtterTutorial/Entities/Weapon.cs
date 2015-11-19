@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Otter;
+using OtterTutorial.Effects;
+using OtterTutorial.Scenes;
+
+
 namespace OtterTutorial.Entities
 {
     public class Weapon
@@ -20,6 +25,7 @@ namespace OtterTutorial.Entities
         public float bulletRange;
         public Bullet bullet;
         public List<BulletData> clip;
+        public Sound shootSnd = new Sound(Assets.SND_BULLET_SHOOT);
 
         public Weapon()
         {
@@ -44,8 +50,8 @@ namespace OtterTutorial.Entities
             fireRate = Global.player.equippedWeapon.fireRate; // r.Next(5, 50);
             baseDamage = Global.player.equippedWeapon.baseDamage;//r.Next(5, 50);
             bulletCount = Global.player.equippedWeapon.bulletCount; //r.Next(1, 10);
-            //Console.WriteLine(bulletCount);
-            Console.WriteLine(bulletCount);
+
+
             //All the below code is for figuring out how to angle the projectiles.
             if (bulletCount % 2 == 0)
             {
@@ -105,34 +111,41 @@ namespace OtterTutorial.Entities
         }
 
         //Shoot that shit!
-        public void fire()
+        public Boolean fire()
         {
             //Console.WriteLine(bulletCount);
+
+
 
             if (fireCooldown <= 0)
             {
                 int direction = -1;
 
-                if (Global.PlayerSession.Controller.R1.Pressed)
+                if (Global.PlayerSession.Controller.Button("r1").Pressed)
                 {
                    direction =  Global.player.direction;
                 }
-                else if (Global.PlayerSession.Controller.B.Down)
+                else if (Global.PlayerSession.Controller.Button("b").Down)
                 {
                     direction = Global.DIR_RIGHT;
                     Global.player.sprite.Play("walkRight");
+                    Global.player.sprite.FlippedX = false;
                 }
-                else if (Global.PlayerSession.Controller.X.Down)
+                else if (Global.PlayerSession.Controller.Button("x").Down)
                 {
                     direction = Global.DIR_LEFT;
+                    Global.player.sprite.Play("walkLeft");
+                    Global.player.sprite.FlippedX = true;
                 }
-                else if (Global.PlayerSession.Controller.Y.Down)
+                else if (Global.PlayerSession.Controller.Button("y").Down)
                 {
                     direction = Global.DIR_UP;
+                    Global.player.sprite.Play("walkUp");
                 }
-                else if (Global.PlayerSession.Controller.A.Down)
+                else if (Global.PlayerSession.Controller.Button("a").Down)
                 {
                     direction = Global.DIR_DOWN;
+                    Global.player.sprite.Play("walkDown");
                 }
 
                 if (direction != -1)
@@ -141,7 +154,10 @@ namespace OtterTutorial.Entities
                     {
                         Global.TUTORIAL.Scene.Add(new Bullet(bullet, Global.player.X, Global.player.Y, direction, "player"));
                     }
-                    
+                    // This line goes in our constructor
+                    shootSnd.Volume = .2f;
+                    shootSnd.Play();
+
                     fireCooldown = fireRate;
                 }
             }
@@ -154,6 +170,14 @@ namespace OtterTutorial.Entities
             {
                 fireCooldown = fireCooldown - 1;
             }
+
+            //Set sprite direction while "shooting"
+            if(Global.PlayerSession.Controller.Button("a").Down || Global.PlayerSession.Controller.Button("b").Down || Global.PlayerSession.Controller.Button("y").Down || Global.PlayerSession.Controller.Button("x").Down){
+                return true;
+            }else{
+                return false;
+            }
+
         }
 
         public void WriteWeaponStats()

@@ -1,7 +1,6 @@
-﻿using System;
+﻿using SFML.Audio;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 
 namespace Otter {
@@ -11,8 +10,6 @@ namespace Otter {
     public class Music : IDisposable {
 
         #region Static Fields
-
-        static string globalVolumeEventId = "__otterMusicVolume";
 
         static float globalVolume = 1f;
 
@@ -30,8 +27,7 @@ namespace Otter {
                 return globalVolume;
             }
             set {
-                globalVolume = value;
-                EventRouter.Publish(globalVolumeEventId);
+                globalVolume = Util.Clamp(value, 0, 1);
                 foreach (var m in musics) {
                     m.Volume = m.Volume; //update music volume
                 }
@@ -71,11 +67,11 @@ namespace Otter {
         }
 
         /// <summary>
-        /// Set the playback offset of the music.
+        /// Set the playback offset of the music in milliseconds.
         /// </summary>
         public int Offset {
             set { music.PlayingOffset = new TimeSpan(0, 0, 0, 0, value); }
-            get { return music.PlayingOffset.Milliseconds; }
+            get { return (int)music.PlayingOffset.TotalMilliseconds; }
         }
 
         /// <summary>
@@ -90,8 +86,13 @@ namespace Otter {
         /// The duration in milliseconds of the music.
         /// </summary>
         public int Duration {
-            get { return music.Duration.Milliseconds; }
+            get { return (int)music.Duration.TotalMilliseconds; }
         }
+
+        /// <summary>
+        /// Check if the Music is currently playing.
+        /// </summary>
+        public bool IsPlaying { get { return music.Status == SoundStatus.Playing; } }
 
         #endregion
 
@@ -117,6 +118,20 @@ namespace Otter {
             Initialize();
         }
 
+        #endregion
+
+        #region Private Methods
+
+        void Initialize() {
+            music.RelativeToListener = false;
+            music.Attenuation = 100;
+            musics.Add(this);
+        }
+
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Play the music.
         /// </summary>
@@ -139,28 +154,13 @@ namespace Otter {
             music.Pause();
         }
 
-        #endregion
-
-        #region Private Methods
-
-        void Initialize() {
-            music.RelativeToListener = false;
-            music.Attenuation = 100;
-            EventRouter.Subscribe(globalVolumeEventId, HandleGlobalVolumeChange);
-        }
-
-        void HandleGlobalVolumeChange(EventRouter.Event e) {
-            // Update volume (Volume setter does this, so set Volume to Volume)
-            Volume = Volume;
-        }
-
-        #endregion
-
-        #region Public Methods
-
+        /// <summary>
+        /// Dispose the music. (I don't think this works right now.)
+        /// </summary>
         public void Dispose() {
-            EventRouter.Unsubscribe(globalVolumeEventId, HandleGlobalVolumeChange);
+            musics.Remove(this);
             music.Dispose();
+            music = null;
         }
 
         #endregion 

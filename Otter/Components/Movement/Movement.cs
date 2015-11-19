@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Otter {
     /// <summary>
@@ -53,14 +51,15 @@ namespace Otter {
         /// <summary>
         /// The list of types that the Collider should check for collisions for when moving.
         /// </summary>
-        public List<int> CollidesWith { get; private set; }
+        public List<int> CollisionsSolid { get; private set; }
+
 
         #endregion
 
         #region Constructors
 
         public Movement() {
-            CollidesWith = new List<int>();
+            CollisionsSolid = new List<int>();
         }
 
         #endregion
@@ -70,11 +69,19 @@ namespace Otter {
         /// <summary>
         /// Register a tag that the Collider should check for collisions with.
         /// </summary>
-        /// <param name="tags"></param>
+        /// <param name="tags">The tags to collide with.</param>
         public void AddCollision(params int[] tags) {
-            foreach (int t in tags) {
-                CollidesWith.Add(t);
+            foreach (var t in tags) {
+                CollisionsSolid.Add(t);
             }
+        }
+
+        /// <summary>
+        /// Register a tag that the Collider should check for collisions with.
+        /// </summary>
+        /// <param name="tags">The tags to collide with.</param>
+        public void AddCollision(params Enum[] tags) {
+            AddCollision(Util.EnumToIntArray(tags));
         }
 
         /// <summary>
@@ -83,8 +90,8 @@ namespace Otter {
         /// <param name="tags"></param>
         public void RemoveCollision(params int[] tags) {
             foreach (int t in tags) {
-                if (CollidesWith.Contains(t)) {
-                    CollidesWith.Remove(t);
+                if (CollisionsSolid.Contains(t)) {
+                    CollisionsSolid.Remove(t);
                 }
             }
         }
@@ -94,13 +101,13 @@ namespace Otter {
         /// </summary>
         /// <param name="speed">The speed to move by (remember SpeedScale is applied.)</param>
         /// <param name="collider">The Collider to use when moving.</param>
-        public void MoveX(int speed, Collider collider = null) {
+        public virtual void MoveX(int speed, Collider collider = null) {
             MoveBufferX += speed;
 
             while (Math.Abs(MoveBufferX) >= SpeedScale) {
                 int move = Math.Sign(MoveBufferX);
                 if (collider != null) {
-                    Collider c = collider.Collide(Entity.X + move, Entity.Y, CollidesWith);
+                    Collider c = collider.Collide(Entity.X + move, Entity.Y, CollisionsSolid);
                     if (c == null) {
                         Entity.X += move;
                         MoveBufferX = (int)Util.Approach(MoveBufferX, 0, SpeedScale);
@@ -110,7 +117,7 @@ namespace Otter {
                         MoveCollideX(c);
                     }
                 }
-                if (collider == null || CollidesWith.Count == 0) {
+                if (collider == null || CollisionsSolid.Count == 0) {
                     Entity.X += move;
                     MoveBufferX = (int)Util.Approach(MoveBufferX, 0, SpeedScale);
                 }
@@ -123,13 +130,13 @@ namespace Otter {
         /// </summary>
         /// <param name="speed">The speed to move by (remember SpeedScale is applied.)</param>
         /// <param name="collider">The Collider to use when moving.</param>
-        public void MoveY(int speed, Collider collider = null) {
+        public virtual void MoveY(int speed, Collider collider = null) {
             MoveBufferY += speed;
 
             while (Math.Abs(MoveBufferY) >= SpeedScale) {
                 int move = Math.Sign(MoveBufferY);
                 if (collider != null) {
-                    Collider c = collider.Collide(Entity.X, Entity.Y + move, CollidesWith);
+                    Collider c = collider.Collide(Entity.X, Entity.Y + move, CollisionsSolid);
                     if (c == null) {
                         Entity.Y += move;
                         MoveBufferY = (int)Util.Approach(MoveBufferY, 0, SpeedScale);
@@ -139,11 +146,10 @@ namespace Otter {
                         MoveCollideY(c);
                     }
                 }
-                if (collider == null || CollidesWith.Count == 0) {
+                if (collider == null || CollisionsSolid.Count == 0) {
                     Entity.Y += move;
                     MoveBufferY = (int)Util.Approach(MoveBufferY, 0, SpeedScale);
                 }
-
             }
         }
 
